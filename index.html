@@ -3,46 +3,146 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wht D Fork | Menu</title>
+    <title>Wht D Fork | Digital Menu</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<!-- Top Navigation Bar for Menu Page -->
-<div class="top-bar">
-    <!-- Hidden link to main page inside menu icon on the left -->
-    <button class="menu-icon-btn" onclick="toggleMenu()" aria-label="Open Navigation">☰</button>
-    <div class="brand-name">Wht D Fork</div>
-    <div style="width: 30px;"><!-- Empty spacer for visual symmetry --></div>
-</div>
+    <!-- Top Navigation -->
+    <nav class="top-bar">
 
-<!-- Dropdown Drawer for Main Website Link -->
-<div class="dropdown-drawer" id="dropdownDrawer">
-    <a href="main-page.html" class="drawer-item">🏠 About Us & Main Site</a>
-</div>
+        <button class="menu-icon-btn"
+                onclick="toggleMenu()"
+                aria-label="Open Navigation">
+            ☰
+        </button>
 
-<div class="header">
-    <div class="header-content">
-        <h1>Wht D Fork</h1>
-        <p>Happiness in Every Bite</p>
-    </div>
-</div>
+        <div class="brand-name">
+            Wht D Fork
+        </div>
 
-<div class="menu-container">
-    <img class="menu-image" src="images/Cover.JPG" alt="Cover">
-    <img class="menu-image" src="images/pizza_menu.JPG" alt="Pizza Menu">
-    <img class="menu-image" src="images/momos.JPG" alt="Momos">
-    <img class="menu-image" src="images/other_items.JPG" alt="Other Items">
-    <img class="menu-image" src="images/desserts.JPG" alt="Desserts">
-    <img class="menu-image" src="images/thank_you.JPG" alt="Thank You">
-</div>
+        <a href="home.html" class="visit-btn">
+            Explore Us →
+        </a>
 
-<script>
-    function toggleMenu() {
-        const drawer = document.getElementById('dropdownDrawer');
-        drawer.classList.toggle('active');
-    }
-</script>
+    </nav>
+
+    <!-- Navigation Drawer -->
+    <aside class="dropdown-drawer" id="dropdownDrawer">
+
+        <div class="drawer-header">
+
+            <span>Navigation</span>
+
+            <button onclick="toggleMenu()" aria-label="Close Navigation">
+                ✕
+            </button>
+
+        </div>
+
+        <a href="home.html" class="drawer-item">
+            🏠 Home
+        </a>
+
+        <a href="home.html#about" class="drawer-item">
+            ❤️ About Us
+        </a>
+
+        <a href="home.html#gallery" class="drawer-item">
+            📷 Gallery
+        </a>
+
+        <a href="home.html#reviews" class="drawer-item">
+            ⭐ Reviews
+        </a>
+
+        <a href="home.html#location" class="drawer-item">
+            📍 Find Us
+        </a>
+
+        <a href="home.html#contact" class="drawer-item">
+            ☎ Contact
+        </a>
+
+    </aside>
+
+    <!-- Page Header -->
+    <header class="header">
+
+        <div class="header-content">
+
+            <p class="hero-tagline">
+                Happiness in Every Bite
+            </p>
+
+            <p class="hero-description">
+                Scan • Browse • Enjoy
+            </p>
+
+        </div>
+
+    </header>
+
+    <!-- Digital Menu -->
+    <main class="menu-container">
+
+        <img class="menu-image"
+             src="images/Cover.JPG"
+             alt="Wht D Fork Cover">
+
+        <img class="menu-image"
+             src="images/pizza_menu.JPG"
+             alt="Pizza Menu">
+
+        <img class="menu-image"
+             src="images/momos.JPG"
+             alt="Momos">
+
+        <img class="menu-image"
+             src="images/other_items.JPG"
+             alt="Other Items">
+
+        <img class="menu-image"
+             src="images/desserts.JPG"
+             alt="Desserts">
+
+        <img class="menu-image"
+             src="images/thank_you.JPG"
+             alt="Thank You">
+
+    </main>
+
+    <script>
+
+        const drawer = document.getElementById("dropdownDrawer");
+
+        function toggleMenu() {
+            drawer.classList.toggle("active");
+        }
+
+        document.addEventListener("click", function(event) {
+
+            const clickedMenuButton = event.target.closest(".menu-icon-btn");
+
+            if (clickedMenuButton) {
+                return;
+            }
+
+            if (!drawer.contains(event.target)) {
+                drawer.classList.remove("active");
+            }
+
+        });
+
+        window.addEventListener("keydown", function(event) {
+
+            if (event.key === "Escape") {
+                drawer.classList.remove("active");
+            }
+
+        });
+
+    </script>
 
 </body>
 </html>
