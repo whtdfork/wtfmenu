@@ -1,0 +1,31 @@
+body{
+    margin:0;
+    background:#f3f3f3;
+    font-family:Arial,sans-serif;
+}
+
+.header{
+    background:#b30000;
+    color:white;
+    text-align:center;
+    padding:20px;
+}
+
+.header h1{
+    margin:0;
+    font-size:36px;
+}
+
+.header p{
+    margin-top:8px;
+    font-size:18px;
+}
+
+.menu-image{
+    display:block;
+    width:100%;
+    max-width:900px;
+    margin:25px auto;
+    border-radius:12px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.25);
+}
