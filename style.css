@@ -1,31 +1,114 @@
-body{
-    margin:0;
-    background:#f3f3f3;
-    font-family:Arial,sans-serif;
+/* Base Layout Reset */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
-.header{
-    background:#b30000;
-    color:white;
-    text-align:center;
-    padding:20px;
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #F8F0DD;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
 }
 
-.header h1{
-    margin:0;
-    font-size:36px;
+/* Top Navigation Bar */
+.top-bar {
+    position: sticky;
+    top: 0;
+    width: 100%;
+    background-color: #A30B17;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 20px;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
-.header p{
-    margin-top:8px;
-    font-size:18px;
+.menu-icon-btn {
+    background: none;
+    border: none;
+    color: #ffffff;
+    font-size: 1.5rem;
+    cursor: pointer;
 }
 
-.menu-image{
-    display:block;
-    width:100%;
-    max-width:900px;
-    margin:25px auto;
-    border-radius:12px;
-    box-shadow:0 4px 12px rgba(0,0,0,0.25);
+.brand-name {
+    font-weight: bold;
+    font-size: 1.1rem;
+    letter-spacing: 0.5px;
+}
+
+/* Dropdown Drawer */
+.dropdown-drawer {
+    display: none;
+    width: 100%;
+    background-color: #ffffff;
+    border-bottom: 2px solid #A30B17;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    z-index: 99;
+}
+
+.dropdown-drawer.active {
+    display: block;
+}
+
+.drawer-item {
+    display: block;
+    padding: 14px 20px;
+    color: #2B1810;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.drawer-item:hover {
+    background-color: #f8f0dd;
+}
+
+/* Header Container */
+.header {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 25px 20px 15px 20px;
+    background: linear-gradient(135deg, #ff7e5f, #feb47b);
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    margin-bottom: 20px;
+}
+
+.header-content h1 {
+    font-size: 2.2rem;
+    margin-bottom: 5px;
+}
+
+.header-content p {
+    font-size: 1rem;
+    opacity: 0.9;
+}
+
+/* Menu Container & Images Alignment */
+.menu-container {
+    width: 100%;
+    max-width: 800px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    padding: 0 15px 30px 15px;
+}
+
+.menu-image {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }

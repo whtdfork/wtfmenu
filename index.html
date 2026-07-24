@@ -3,27 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wht D Fork</title>
+    <title>Wht D Fork | Menu</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="header">
-    <h1>Wht D Fork</h1>
-    <p>Happiness in Every Bite</p>
+<!-- Top Navigation Bar for Menu Page -->
+<div class="top-bar">
+    <!-- Hidden link to main page inside menu icon on the left -->
+    <button class="menu-icon-btn" onclick="toggleMenu()" aria-label="Open Navigation">☰</button>
+    <div class="brand-name">Wht D Fork</div>
+    <div style="width: 30px;"><!-- Empty spacer for visual symmetry --></div>
 </div>
 
-<img class="menu-image" src="images/Cover.JPG" alt="Cover">
+<!-- Dropdown Drawer for Main Website Link -->
+<div class="dropdown-drawer" id="dropdownDrawer">
+    <a href="main-page.html" class="drawer-item">🏠 About Us & Main Site</a>
+</div>
 
-<img class="menu-image" src="images/pizza_menu.JPG" alt="Pizza Menu">
+<div class="header">
+    <div class="header-content">
+        <h1>Wht D Fork</h1>
+        <p>Happiness in Every Bite</p>
+    </div>
+</div>
 
-<img class="menu-image" src="images/momos.JPG" alt="Momos">
+<div class="menu-container">
+    <img class="menu-image" src="images/Cover.JPG" alt="Cover">
+    <img class="menu-image" src="images/pizza_menu.JPG" alt="Pizza Menu">
+    <img class="menu-image" src="images/momos.JPG" alt="Momos">
+    <img class="menu-image" src="images/other_items.JPG" alt="Other Items">
+    <img class="menu-image" src="images/desserts.JPG" alt="Desserts">
+    <img class="menu-image" src="images/thank_you.JPG" alt="Thank You">
+</div>
 
-<img class="menu-image" src="images/other_items.JPG" alt="Other Items">
-
-<img class="menu-image" src="images/desserts.JPG" alt="Desserts">
-
-<img class="menu-image" src="images/thank_you.JPG" alt="Thank You">
+<script>
+    function toggleMenu() {
+        const drawer = document.getElementById('dropdownDrawer');
+        drawer.classList.toggle('active');
+    }
+</script>
 
 </body>
 </html>
