@@ -6,7 +6,7 @@
 window.SITE_CONFIG = {
   name: "Wht D Fork",
   shortDescription: "Pure Veg Restaurant",
-  announcement: "🔥 Buy 2 Medium Pizzas & get Garlic Bread FREE",
+  announcement: "🔥  Buy 3 Large Pizzas & get Garlic Bread FREE (Under Construction)",
   heroEyebrow: "PURE VEG • MADE WITH LOVE",
   heroTitle: "Happiness in every bite.",
   heroText: "Your neighbourhood spot for handcrafted pizzas, satisfying snacks and good times with the people you love.",
@@ -14,15 +14,15 @@ window.SITE_CONFIG = {
   rating: "4.9 rating",
   address: "Add your restaurant address here, including city and postcode.",
   phone: "+910000000000",
-  email: "hello@example.com",
+  email: "whtdfork@gmail.com",
   whatsappNumber: "910000000000", // country code + number, no +, spaces or dashes
   mapUrl: "https://maps.google.com/?q=Add+your+restaurant+address",
   hours: [
-    ["Monday – Friday", "10:00 AM – 11:00 PM"],
-    ["Saturday – Sunday", "10:00 AM – 11:30 PM"]
+    ["Monday – Friday", "11:00 AM – 11:59 PM"],
+    ["Saturday – Sunday", "11:00 AM – 11:59 PM"]
   ],
   socials: {
-    Instagram: "https://instagram.com/your-account",
+    Instagram: "https://www.instagram.com/whtdfork",
     Facebook: "https://facebook.com/your-page",
     YouTube: "https://youtube.com/@your-channel"
   },
@@ -34,7 +34,7 @@ window.SITE_CONFIG = {
   ],
   favourites: [
     { name: "Veggie Delight Pizza", description: "Onion, capsicum, corn and mozzarella.", price: "From ₹229", image: "images/create veggie-delight.png" },
-    { name: "Tandoori Paneer", description: "Smoky, spiced paneer grilled to perfection.", price: "From ₹199", image: "images/tandoori-paneer.png" },
+    { name: "Tandoori Paneer", description: "Smoky, spiced paneer grilled to perfection.", price: "From ₹299", image: "images/tandoori-paneer.png" },
     { name: "White Sauce Pasta", description: "Creamy, garlicky and full of vegetables.", price: "From ₹189", image: "images/white-sauce-pasta.png" }
   ],
   gallery: [
@@ -42,6 +42,9 @@ window.SITE_CONFIG = {
     ["images/cheese-melt-burger.png", "Cheese melt burger"],
     ["images/steamed-paneer-momos.png", "Paneer momos"],
     ["images/cold-coffee.png", "Cold coffee"],
-    ["images/kurkure-fried-momos.png", "Kurkure momos"]
+    ["images/kurkure-fried-momos.png", "Kurkure momos"],
+    ["images/crispy-veg-burger.png", "Crispy veg burger"],
+    ["images/grilled-cheese-sandwich.png", "Grilled cheese sandwich"],
+    ["images/peri-peri-fries.png", "Peri peri fries"]
   ]
 };
