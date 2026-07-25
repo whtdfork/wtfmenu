@@ -3,27 +3,179 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wht D Fork</title>
+    <title>Wht D Fork | Digital Menu</title>
     <link rel="stylesheet" href="style.css">
+    <script src="site-config.js" defer></script>
 </head>
 <body>
 
-<div class="header">
-    <h1>Wht D Fork</h1>
-    <p>Happiness in Every Bite</p>
-</div>
+    <!-- Top Navigation -->
+    <nav class="top-bar">
 
-<img class="menu-image" src="images/Cover.JPG" alt="Cover">
+        <button class="menu-icon-btn"
+                onclick="toggleMenu()"
+                aria-label="Open Navigation">
+            ☰
+        </button>
 
-<img class="menu-image" src="images/pizza_menu.JPG" alt="Pizza Menu">
+        <div class="brand-name">
+            Wht D Fork
+        </div>
 
-<img class="menu-image" src="images/momos.JPG" alt="Momos">
+        <a href="home.html" class="visit-btn">
+            Explore Us →
+        </a>
 
-<img class="menu-image" src="images/other_items.JPG" alt="Other Items">
+    </nav>
 
-<img class="menu-image" src="images/desserts.JPG" alt="Desserts">
+    <!-- Navigation Drawer -->
+    <aside class="dropdown-drawer" id="dropdownDrawer">
 
-<img class="menu-image" src="images/thank_you.JPG" alt="Thank You">
+        <div class="drawer-header">
+
+            <span>Navigation</span>
+
+            <button onclick="toggleMenu()" aria-label="Close Navigation">
+                ✕
+            </button>
+
+        </div>
+
+        <a href="home.html" class="drawer-item">
+            🏠 Home
+        </a>
+
+        <a href="home.html#about" class="drawer-item">
+            ❤️ About Us
+        </a>
+
+        <a href="home.html#gallery" class="drawer-item">
+            📷 Gallery
+        </a>
+
+        <a href="home.html#favourites" class="drawer-item">
+            ⭐ Favourites
+        </a>
+
+        <a href="home.html#visit" class="drawer-item">
+            📍 Find Us
+        </a>
+
+        <a href="home.html#visit" class="drawer-item">
+            ☎ Contact & Hours
+        </a>
+
+        <a id="menuWhatsapp" class="drawer-item" target="_blank" rel="noopener">
+            💬 WhatsApp Us
+        </a>
+
+        <a id="menuInstagram" class="drawer-item" target="_blank" rel="noopener">
+            📷 Instagram
+        </a>
+
+        <a id="menuFacebook" class="drawer-item" target="_blank" rel="noopener">
+            👍 Facebook
+        </a>
+
+        <a id="menuYoutube" class="drawer-item" target="_blank" rel="noopener">
+            ▶ YouTube
+        </a>
+
+        <a id="menuMap" class="drawer-item" target="_blank" rel="noopener">
+            📍 Get Directions
+        </a>
+
+    </aside>
+
+    <!-- Page Header -->
+    <header class="header">
+
+        <div class="header-content">
+
+            <p class="hero-tagline">
+                Happiness in Every Bite
+            </p>
+
+            <p class="hero-description">
+                Scan • Browse • Enjoy
+            </p>
+
+        </div>
+
+    </header>
+
+    <!-- Digital Menu -->
+    <main class="menu-container">
+
+        <img class="menu-image"
+             src="images/menu/1_cover.JPG"
+             alt="Wht D Fork Cover">
+
+        <img class="menu-image"
+             src="images/menu/2_pizza_menu.JPG"
+             alt="Pizza Menu">
+
+        <img class="menu-image"
+             src="images/menu/3_momos.JPG"
+             alt="Momos">
+
+        <img class="menu-image"
+             src="images/menu/4_other_items.JPG"
+             alt="Other Items">
+
+        <img class="menu-image"
+             src="images/menu/5_desserts.JPG"
+             alt="Desserts">
+
+        <img class="menu-image"
+             src="images/menu/6_thank_you.JPG"
+             alt="Thank You">
+
+    </main>
+
+    <script>
+
+        const drawer = document.getElementById("dropdownDrawer");
+
+        function toggleMenu() {
+            drawer.classList.toggle("active");
+        }
+
+        document.addEventListener("click", function(event) {
+
+            const clickedMenuButton = event.target.closest(".menu-icon-btn");
+
+            if (clickedMenuButton) {
+                return;
+            }
+
+            if (!drawer.contains(event.target)) {
+                drawer.classList.remove("active");
+            }
+
+        });
+
+        window.addEventListener("keydown", function(event) {
+
+            if (event.key === "Escape") {
+                drawer.classList.remove("active");
+            }
+
+        });
+
+        window.addEventListener("DOMContentLoaded", function() {
+            const config = window.SITE_CONFIG;
+            if (!config) return;
+            document.title = `${config.name} | Digital Menu`;
+            document.querySelector(".brand-name").textContent = config.name;
+            document.getElementById("menuWhatsapp").href = `https://wa.me/${config.whatsappNumber}`;
+            document.getElementById("menuInstagram").href = config.socials.Instagram;
+            document.getElementById("menuFacebook").href = config.socials.Facebook;
+            document.getElementById("menuYoutube").href = config.socials.YouTube;
+            document.getElementById("menuMap").href = config.mapUrl;
+        });
+
+    </script>
 
 </body>
 </html>

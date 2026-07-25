@@ -1,0 +1,52 @@
+[
+{
+    "id": "create-veggie-delight",
+    "name": "Veggie Delight",
+    "category": "pizza",
+    "image": "images/create veggie-delight.png",
+    "desc": "Loaded with fresh onions, capsicum, and golden corn.",
+    "rating": "4.6",
+    "ingredients": ["Capsicum", "Onions", "Golden Corn", "Mozzarella"],
+    "prices": [{ "size": "Regular", "price": "₹229" }]
+  },
+  {
+    "id": "grilled-cheese-sandwich",
+    "name": "Grilled Cheese Sandwich",
+    "category": "sandwiches",
+    "image": "images/grilled-cheese-sandwich.png",
+    "desc": "Golden toasted sandwich packed with melted cheese and herbs.",
+    "rating": "4.4",
+    "ingredients": ["Bread", "Cheddar", "Butter", "Herbs"],
+    "prices": [{ "size": "Standard", "price": "₹119" }]
+  },
+  {
+    "id": "peri-peri-fries",
+    "name": "Peri Peri Fries",
+    "category": "sides",
+    "image": "images/peri-peri-fries.png",
+    "desc": "Crispy French fries tossed in spicy peri peri seasoning.",
+    "rating": "4.8",
+    "ingredients": ["Potatoes", "Peri Peri Spice", "Oil"],
+    "prices": [{ "size": "Regular", "price": "₹99" }]
+  },
+  {
+    "id": "tandoori-paneer",
+    "name": "Tandoori Paneer",
+    "category": "starters",
+    "image": "images/tandoori-paneer.png",
+    "desc": "Marinated paneer cubes grilled to perfection.",
+    "rating": "4.7",
+    "ingredients": ["Paneer", "Yogurt", "Tandoori Masala"],
+    "prices": [{ "size": "Standard", "price": "₹199" }]
+  },
+  {
+    "id": "white-sauce-pasta",
+    "name": "White Sauce Pasta",
+    "category": "pasta",
+    "image": "images/white-sauce-pasta.png",
+    "desc": "Creamy Alfredo pasta cooked with garlic and fresh vegetables.",
+    "rating": "4.6",
+    "ingredients": ["Penne", "White Sauce", "Garlic", "Veggies"],
+    "prices": [{ "size": "Standard", "price": "₹189" }]
+  }
+]
