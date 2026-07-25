@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wht D Fork | Digital Menu</title>
     <link rel="stylesheet" href="style.css">
+    <script src="site-config.js" defer></script>
 </head>
 <body>
 
@@ -52,16 +53,36 @@
             📷 Gallery
         </a>
 
-        <a href="home.html#reviews" class="drawer-item">
-            ⭐ Reviews
+        <a href="home.html#favourites" class="drawer-item">
+            ⭐ Favourites
         </a>
 
-        <a href="home.html#location" class="drawer-item">
+        <a href="home.html#visit" class="drawer-item">
             📍 Find Us
         </a>
 
-        <a href="home.html#contact" class="drawer-item">
-            ☎ Contact
+        <a href="home.html#visit" class="drawer-item">
+            ☎ Contact & Hours
+        </a>
+
+        <a id="menuWhatsapp" class="drawer-item" target="_blank" rel="noopener">
+            💬 WhatsApp Us
+        </a>
+
+        <a id="menuInstagram" class="drawer-item" target="_blank" rel="noopener">
+            📷 Instagram
+        </a>
+
+        <a id="menuFacebook" class="drawer-item" target="_blank" rel="noopener">
+            👍 Facebook
+        </a>
+
+        <a id="menuYoutube" class="drawer-item" target="_blank" rel="noopener">
+            ▶ YouTube
+        </a>
+
+        <a id="menuMap" class="drawer-item" target="_blank" rel="noopener">
+            📍 Get Directions
         </a>
 
     </aside>
@@ -140,6 +161,18 @@
                 drawer.classList.remove("active");
             }
 
+        });
+
+        window.addEventListener("DOMContentLoaded", function() {
+            const config = window.SITE_CONFIG;
+            if (!config) return;
+            document.title = `${config.name} | Digital Menu`;
+            document.querySelector(".brand-name").textContent = config.name;
+            document.getElementById("menuWhatsapp").href = `https://wa.me/${config.whatsappNumber}`;
+            document.getElementById("menuInstagram").href = config.socials.Instagram;
+            document.getElementById("menuFacebook").href = config.socials.Facebook;
+            document.getElementById("menuYoutube").href = config.socials.YouTube;
+            document.getElementById("menuMap").href = config.mapUrl;
         });
 
     </script>
