@@ -12,19 +12,22 @@
     <!-- Top Navigation -->
     <nav class="top-bar">
 
-        <button class="menu-icon-btn"
-                onclick="toggleMenu()"
-                aria-label="Open Navigation">
-            ☰
-        </button>
-
-        <div class="brand-name">
-            Wht D Fork
-        </div>
-
-        <a href="home.html" class="visit-btn">
-            Explore Us →
+        <a href="home.html" class="menu-brand" aria-label="Wht D Fork home">
+            <img src="images/logo.png" alt="Wht D Fork logo">
+            <span>
+                <b class="brand-name">Wht D Fork</b>
+                <small>Pure Veg Restaurant</small>
+            </span>
         </a>
+
+        <div class="menu-header-actions">
+            <a href="home.html" class="visit-btn">Explore us <span>↗</span></a>
+            <button class="menu-icon-btn"
+                    onclick="toggleMenu()"
+                    aria-label="Open Navigation">
+                ☰
+            </button>
+        </div>
 
     </nav>
 

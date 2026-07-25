@@ -32,7 +32,14 @@
   };
   const socialLinks = Object.entries(config.socials).map(([name, url]) => `<a href="${url}" target="_blank" rel="noopener" aria-label="Visit our ${name}">${socialIcons[name] || ''}<span>${name}</span></a>`).join('');
   document.querySelector('#socials').innerHTML = socialLinks;
-  document.querySelector('#mobileSocials').innerHTML = socialLinks;
+  document.querySelector('#homeWhatsapp').href = whatsappHref;
+  document.querySelector('#homeInstagram').href = config.socials.Instagram;
+  document.querySelector('#homeFacebook').href = config.socials.Facebook;
+  document.querySelector('#homeYoutube').href = config.socials.YouTube;
+  document.querySelector('#homeMap').href = config.mapUrl;
+  document.querySelector('#homeInstagram').innerHTML = `${socialIcons.Instagram}<span>Instagram</span>`;
+  document.querySelector('#homeFacebook').innerHTML = `${socialIcons.Facebook}<span>Facebook</span>`;
+  document.querySelector('#homeYoutube').innerHTML = `${socialIcons.YouTube}<span>YouTube</span>`;
   const nav = document.querySelector('.mobile-nav'), scrim = document.querySelector('.nav-scrim'), toggle = document.querySelector('.menu-toggle');
   const close = () => { nav.classList.remove('open'); scrim.classList.remove('open'); toggle.setAttribute('aria-expanded', 'false'); };
   toggle.addEventListener('click', () => { nav.classList.add('open'); scrim.classList.add('open'); toggle.setAttribute('aria-expanded', 'true'); });
