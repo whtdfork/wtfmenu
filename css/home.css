@@ -4,3 +4,26 @@
 .gallery-grid{grid-auto-rows:190px}
 @media(max-width:760px){.gallery-grid{grid-auto-rows:180px}}
 @media(max-width:480px){.gallery-grid{grid-auto-rows:145px}}
+
+/* Mobile refinements: preserve the visual style while reducing scroll fatigue. */
+.visit-qr{display:flex;flex-direction:column;justify-content:center;align-items:center;padding:36px;background:linear-gradient(145deg,#f6ead8,#ead6b9)}
+.visit-qr img{width:min(100%,270px);aspect-ratio:1;object-fit:contain;background:#fff;border-radius:18px;padding:12px}
+.visit-qr p{margin:15px 0 0;color:var(--red);font-size:.78rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;text-align:center}
+@media(max-width:760px){
+  .hero{padding-top:42px;padding-bottom:48px}
+  .hero-ctas{margin-top:24px}
+  .about.section{padding-top:55px;padding-bottom:55px}
+  .values{gap:12px}
+  .value-card{padding:18px}
+  .value-card h3{font-size:1.12rem;margin:8px 0 4px}
+  .value-card p{font-size:.8rem;line-height:1.4}
+  .gallery-grid{grid-template-columns:repeat(2,1fr);grid-template-rows:none;grid-auto-rows:155px;gap:12px}
+  .gallery-item:first-child{grid-row:auto}
+  .visit-qr{min-height:250px;padding:25px}
+}
+@media(min-width:361px) and (max-width:480px){.values{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:360px){.gallery-grid{grid-auto-rows:135px}}
+
+.socials a,.mobile-socials a{display:inline-flex;align-items:center;gap:6px}
+.socials svg,.mobile-socials svg{width:16px;height:16px;fill:currentColor;stroke:currentColor;stroke-width:1.8}
+.socials svg rect,.socials svg circle,.mobile-socials svg rect,.mobile-socials svg circle{fill:none}

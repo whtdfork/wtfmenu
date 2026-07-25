@@ -6,7 +6,7 @@
 window.SITE_CONFIG = {
   name: "Wht D Fork",
   shortDescription: "Pure Veg Restaurant",
-  announcement: "🔥  Buy 3 Large Pizzas & get Garlic Bread FREE (Under Construction)",
+  announcement: "🔥 Buy 3 Large Pizzas & get Garlic Bread FREE — limited-time offer",
   heroEyebrow: "PURE VEG • MADE WITH LOVE",
   heroTitle: "Happiness in every bite.",
   heroText: "Your neighbourhood spot for handcrafted pizzas, satisfying snacks and good times with the people you love.",
@@ -23,8 +23,8 @@ window.SITE_CONFIG = {
   ],
   socials: {
     Instagram: "https://www.instagram.com/whtdfork",
-    Facebook: "https://facebook.com/your-page",
-    YouTube: "https://youtube.com/@your-channel"
+    Facebook: "https://www.facebook.com/whtdfork",
+    YouTube: "https://www.youtube.com/@Whtdfork"
   },
   values: [
     ["🥬", "Fresh ingredients", "Quality ingredients and vibrant flavours in every order."],

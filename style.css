@@ -168,6 +168,21 @@ body {
     padding-left: 30px;
 }
 
+.drawer-item svg {
+    width: 19px;
+    height: 19px;
+    margin-right: 8px;
+    vertical-align: -4px;
+    fill: currentColor;
+    stroke: currentColor;
+    stroke-width: 1.8;
+}
+
+.drawer-item svg rect,
+.drawer-item svg circle {
+    fill: none;
+}
+
 /* ==========================================================
    HEADER
    ========================================================== */
