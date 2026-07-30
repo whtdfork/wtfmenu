@@ -6,17 +6,19 @@
 window.SITE_CONFIG = {
   name: "Wht D Fork",
   shortDescription: "Pure Veg Restaurant",
-  announcement: "🔥 Buy 3 Large Pizzas & get Garlic Bread FREE — limited-time offer",
+  announcement: "🔥  Buy 3 Large Pizzas & get Garlic Bread FREE!",
   heroEyebrow: "PURE VEG • MADE WITH LOVE",
   heroTitle: "Happiness in every bite.",
-  heroText: "Your neighbourhood spot for handcrafted pizzas, satisfying snacks and good times with the people you love.",
+  heroText: "Freshly prepared pizzas, burgers, momos, pasta, sandwiches, desserts and refreshing beverages—all 100% vegetarian.",
   aboutText: "At Wht D Fork, we believe every meal should feel like a little celebration. We pair fresh ingredients with big flavours to make comfort food worth coming back for.",
   rating: "4.9 rating",
-  address: "Add your restaurant address here, including city and postcode.",
-  phone: "+910000000000",
+  address: "A 62-A, Gali No 5, Kunwar Singh Nagar, Nangloi, New Delhi, Delhi 110041", 
+  phone: "+919643538871",
   email: "whtdfork@gmail.com",
-  whatsappNumber: "910000000000", // country code + number, no +, spaces or dashes
-  mapUrl: "https://maps.google.com/?q=Add+your+restaurant+address",
+  whatsappNumber: "919643538871", // country code + number, no +, spaces or dashes
+  mapUrl: "https://maps.app.goo.gl/CBT6u764oUFvPRS37",
+  website: "https://whtdfork.github.io/wtfmenu/",
+  menuUrl: "https://whtdfork.github.io/wtfmenu/index.html",
   hours: [
     ["Monday – Friday", "11:00 AM – 11:59 PM"],
     ["Saturday – Sunday", "11:00 AM – 11:59 PM"]
@@ -33,7 +35,7 @@ window.SITE_CONFIG = {
     ["❤️", "Made for togetherness", "A warm table for families, friends and food lovers."]
   ],
   favourites: [
-    { name: "Veggie Delight Pizza", description: "Onion, capsicum, corn and mozzarella.", price: "From ₹229", image: "images/create veggie-delight.png" },
+    { name: "Veggie Delight Pizza", description: "Onion, capsicum, corn and mozzarella.", price: "From ₹229", image: "images/veggie-delight.png" },
     { name: "Tandoori Paneer", description: "Smoky, spiced paneer grilled to perfection.", price: "From ₹299", image: "images/tandoori-paneer.png" },
     { name: "White Sauce Pasta", description: "Creamy, garlicky and full of vegetables.", price: "From ₹189", image: "images/white-sauce-pasta.png" }
   ],

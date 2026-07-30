@@ -12,6 +12,15 @@
   <script src="site-config.js" defer></script>
   <script src="home.js" defer></script>
 </head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-BHCMWL56VN"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-BHCMWL56VN');
+</script>
 <body>
   <div class="announcement" id="announcement"></div>
   <header class="site-header">
@@ -19,11 +28,11 @@
     <nav class="desktop-nav" aria-label="Main navigation"><a href="#about">About</a><a href="#favourites">Favourites</a><a href="#gallery">Gallery</a><a href="#visit">Visit us</a></nav>
     <div class="header-actions"><a class="menu-button" href="index.html">Digital menu <span>↗</span></a><button class="menu-toggle" aria-label="Open navigation" aria-expanded="false">☰</button></div>
   </header>
-  <aside class="mobile-nav" aria-label="Mobile navigation"><button class="close-nav" aria-label="Close navigation">×</button><h2>Navigation</h2><a href="#top">🏠 Home</a><a href="#about">❤️ About Us</a><a href="#gallery">📷 Gallery</a><a href="#favourites">⭐ Favourites</a><a href="#visit">📍 Find Us</a><a href="#visit">☎ Contact &amp; Hours</a><a href="index.html">🍕 Digital Menu</a><a id="homeWhatsapp" target="_blank" rel="noopener">💬 WhatsApp Us</a><a id="homeInstagram" target="_blank" rel="noopener">Instagram</a><a id="homeFacebook" target="_blank" rel="noopener">Facebook</a><a id="homeYoutube" target="_blank" rel="noopener">YouTube</a><a id="homeMap" target="_blank" rel="noopener">📍 Get Directions</a></aside><div class="nav-scrim"></div>
+  <aside class="mobile-nav" aria-label="Mobile navigation"><button class="close-nav" aria-label="Close navigation">×</button><h2>Navigation</h2><a href="#top">🏠 Home</a><a href="#about">❤️ About Us</a><a href="#gallery">📷 Gallery</a><a href="#favourites">⭐ Favourites</a><a href="#visit">📍 Find Us</a><a href="#visit">☎ Contact &amp; Hours</a><a href="index.html">🍕 Digital Menu</a><a id="homeWhatsapp" target="_blank" rel="noopener">💬 WhatsApp Us</a><a id="homeInstagram" target="_blank" rel="noopener">Instagram</a><a id="homeFacebook" target="_blank" rel="noopener">Facebook</a><a id="homeYoutube" target="_blank" rel="noopener">YouTube</a><a id="homeMap" href="https://maps.app.goo.gl/CBT6u764oUFvPRS37" target="_blank" rel="noopener">📍 Get Directions</a></aside><div class="nav-scrim"></div>
 
   <main id="top">
     <section class="hero">
-      <div class="hero-copy"><p class="eyebrow" data-site="heroEyebrow"></p><h1 data-site="heroTitle"></h1><p class="hero-text" data-site="heroText"></p><div class="hero-points"><span>🌿 100% vegetarian</span><span>✨ Made fresh to order</span><span>👨‍👩‍👧‍👦 Made for sharing</span></div><div class="hero-ctas"><a class="button primary" href="index.html">Browse digital menu <span>→</span></a><a class="button ghost" id="heroMap" target="_blank" rel="noopener">Get directions</a></div></div>
+      <div class="hero-copy"><p class="eyebrow" data-site="heroEyebrow"></p><h1 data-site="heroTitle"></h1><p class="hero-text" data-site="heroText"></p><div class="hero-points"><span>🌿 100% vegetarian</span><span>✨ Made fresh to order</span><span>👨‍👩‍👧‍👦 Made for sharing</span></div><div class="hero-ctas"><a class="button primary" href="index.html">Browse digital menu <span>→</span></a><a class="button ghost" id="heroMap" href="https://maps.app.goo.gl/CBT6u764oUFvPRS37" target="_blank" rel="noopener">Get directions</a></div></div>
       <div class="hero-art"><div class="hero-card"><img src="images/Cover.JPG" alt="Wht D Fork food menu"></div><div class="hero-note"><span>★</span><div><b id="ratingText"></b><small>Loved by our guests</small></div></div></div>
     </section>
 
@@ -35,7 +44,7 @@
 
     <section class="gallery section" id="gallery"><div class="section-heading"><p class="eyebrow">A TASTE OF WHT D FORK</p><h2>Fresh, colourful, delicious.</h2><p>From cheesy pizzas to satisfying snacks, there is something for every craving.</p></div><div class="gallery-grid" id="galleryGrid"></div></section>
 
-    <section class="visit section" id="visit"><div class="visit-card"><div class="visit-copy"><p class="eyebrow">COME SAY HELLO</p><h2>Good food is better together.</h2><p data-site="address"></p><div class="hours" id="hours"></div><div class="visit-actions"><a class="button primary" id="directionsLink" target="_blank" rel="noopener">Get directions <span>↗</span></a><a class="button ghost" id="callLink">Call us</a></div></div><div class="visit-qr"><img src="images/whtdfork-menu.png" alt="QR code for the Wht D Fork digital menu"><p>Scan to open our digital menu</p></div></div></section>
+    <section class="visit section" id="visit"><div class="visit-card"><div class="visit-copy"><p class="eyebrow">COME SAY HELLO</p><h2>Good food is better together.</h2><p data-site="address"></p><div class="hours" id="hours"></div><div class="visit-actions"><a class="button primary" id="directionsLink" href="https://maps.app.goo.gl/CBT6u764oUFvPRS37" target="_blank" rel="noopener">Get directions <span>↗</span></a><a class="button ghost" id="callLink" href="tel:+919643538871">Call us</a></div></div><div class="visit-qr"><img src="images/whtdfork-menu.png" alt="QR code for the Wht D Fork digital menu"><p>Scan to open our digital menu</p></div></div></section>
   </main>
 
   <footer><div class="footer-brand"><img src="images/logo.png" alt=""><div><b data-site="name"></b><p data-site="shortDescription"></p></div></div><div class="footer-links"><a href="index.html">Digital menu</a><a id="footerWhatsapp" target="_blank" rel="noopener">WhatsApp</a><a id="footerEmail"></a></div><div class="socials" id="socials" aria-label="Social media links"></div><p class="copyright">© <span id="year"></span> <span data-site="name"></span>. All rights reserved.</p></footer>
