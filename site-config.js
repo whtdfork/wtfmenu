@@ -16,7 +16,7 @@ window.SITE_CONFIG = {
   phone: "+919643538871",
   email: "whtdfork@gmail.com",
   whatsappNumber: "919643538871", // country code + number, no +, spaces or dashes
-  mapUrl: "https://maps.app.goo.gl/CBT6u764oUFvPRS37",
+  mapUrl: "https://maps.app.goo.gl/LvFAw7u5oJBMUZxF9",
   website: "https://whtdfork.github.io/wtfmenu/",
   menuUrl: "https://whtdfork.github.io/wtfmenu/index.html",
   hours: [
