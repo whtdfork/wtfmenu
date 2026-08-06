@@ -1,21 +1,22 @@
 /*
-  WEBSITE CONTENT & CONTACT DETAILS
-  Change anything in this file to update the home page and its links.
-  Keep the quotation marks around text and URLs.
+  js/site-config.js
+  Purpose: Site-wide content and configuration exposed as `window.SITE_CONFIG`.
+  Edit this file to change site copy, links and small behavior flags.
 */
 window.SITE_CONFIG = {
   name: "Wht D Fork",
   shortDescription: "Pure Veg Restaurant",
   announcement: "🔥  Buy 3 Large Pizzas & get Garlic Bread FREE!",
   heroEyebrow: "PURE VEG • MADE WITH LOVE",
-  heroTitle: "Happiness in every bite.",
+  heroTitle: "Happiness in Every Bite",
+  heroSubtitle: "Scan • Browse • Enjoy",
   heroText: "Freshly prepared pizzas, burgers, momos, pasta, sandwiches, desserts and refreshing beverages—all 100% vegetarian.",
   aboutText: "At Wht D Fork, we believe every meal should feel like a little celebration. We pair fresh ingredients with big flavours to make comfort food worth coming back for.",
   rating: "4.9 rating",
-  address: "A 62-A, Gali No 5, Kunwar Singh Nagar, Nangloi, New Delhi, Delhi 110041", 
+  address: "A 62-A, Gali No 5, Kunwar Singh Nagar, Nangloi, New Delhi, Delhi 110041",
   phone: "+919643538871",
   email: "whtdfork@gmail.com",
-  whatsappNumber: "919643538871", // country code + number, no +, spaces or dashes
+  whatsappNumber: "919643538871",
   mapUrl: "https://maps.app.goo.gl/LvFAw7u5oJBMUZxF9",
   website: "https://whtdfork.github.io/wtfmenu/",
   menuUrl: "https://whtdfork.github.io/wtfmenu/index.html",

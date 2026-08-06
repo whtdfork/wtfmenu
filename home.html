@@ -17,18 +17,14 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/home.css">
-  <script src="site-config.js" defer></script>
-  <script src="home.js" defer></script>
+  <script src="js/site-config.js" defer></script>
+  <script src="js/includes.js" defer></script>
+  <script src="js/home.js" defer></script>
 </head>
 <body>
-  <div class="announcement" id="announcement"></div>
-  <header class="site-header">
-    <a class="brand" href="#top" aria-label="Wht D Fork home"><img src="images/logo.png" alt="Wht D Fork logo"><span><b data-site="name"></b><small data-site="shortDescription"></small></span></a>
-    <nav class="desktop-nav" aria-label="Main navigation"><a href="#about">About</a><a href="#favourites">Favourites</a><a href="#gallery">Gallery</a><a href="#visit">Visit us</a></nav>
-    <div class="header-actions"><a class="menu-button" href="index.html">Digital menu <span>↗</span></a><button class="menu-toggle" aria-label="Open navigation" aria-expanded="false">☰</button></div>
-  </header>
-  <aside class="mobile-nav" aria-label="Mobile navigation"><button class="close-nav" aria-label="Close navigation">×</button><h2>Navigation</h2><a href="#top">🏠 Home</a><a href="#about">❤️ About Us</a><a href="#gallery">📷 Gallery</a><a href="#favourites">⭐ Favourites</a><a href="#visit">📍 Find Us</a><a href="#visit">☎ Contact &amp; Hours</a><a href="index.html">🍕 Digital Menu</a><a id="homeWhatsapp" target="_blank" rel="noopener">💬 WhatsApp Us</a><a id="homeInstagram" target="_blank" rel="noopener">Instagram</a><a id="homeFacebook" target="_blank" rel="noopener">Facebook</a><a id="homeYoutube" target="_blank" rel="noopener">YouTube</a><a id="homeMap" href="https://maps.app.goo.gl/CBT6u764oUFvPRS37" target="_blank" rel="noopener">📍 Get Directions</a></aside><div class="nav-scrim"></div>
+  <div id="site-header"></div>
 
   <main id="top">
     <section class="hero">
@@ -47,7 +43,6 @@
     <section class="visit section" id="visit"><div class="visit-card"><div class="visit-copy"><p class="eyebrow">COME SAY HELLO</p><h2>Good food is better together.</h2><p data-site="address"></p><div class="hours" id="hours"></div><div class="visit-actions"><a class="button primary" id="directionsLink" href="https://maps.app.goo.gl/CBT6u764oUFvPRS37" target="_blank" rel="noopener">Get directions <span>↗</span></a><a class="button ghost" id="callLink" href="tel:+919643538871">Call us</a></div></div><div class="visit-qr"><img src="images/whtdfork-menu.png" alt="QR code for the Wht D Fork digital menu"><p>Scan to open our digital menu</p></div></div></section>
   </main>
 
-  <footer><div class="footer-brand"><img src="images/logo.png" alt=""><div><b data-site="name"></b><p data-site="shortDescription"></p></div></div><div class="footer-links"><a href="index.html">Digital menu</a><a id="footerWhatsapp" target="_blank" rel="noopener">WhatsApp</a><a id="footerEmail"></a></div><div class="socials" id="socials" aria-label="Social media links"></div><p class="copyright">© <span id="year"></span> <span data-site="name"></span>. All rights reserved.</p></footer>
-  <a class="whatsapp-float" id="whatsappFloat" target="_blank" rel="noopener" aria-label="Chat with us on WhatsApp">💬<span>WhatsApp us</span></a>
+  <div id="site-footer"></div>
 </body>
 </html>

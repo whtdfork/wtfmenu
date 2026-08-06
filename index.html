@@ -13,108 +13,13 @@
 
       gtag('config', 'G-BHCMWL56VN');
     </script>
-    <link rel="stylesheet" href="style.css">
-    <script src="site-config.js" defer></script>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/site-config.js" defer></script>
 </head>
 <body>
 
-    <!-- Top Navigation -->
-    <nav class="top-bar">
-
-        <a href="home.html" class="menu-brand" aria-label="Wht D Fork home">
-            <img src="images/logo.png" alt="Wht D Fork logo">
-            <span>
-                <b class="brand-name">Wht D Fork</b>
-                <small>Pure Veg Restaurant</small>
-            </span>
-        </a>
-
-        <div class="menu-header-actions">
-            <a href="home.html" class="visit-btn">Explore us <span>↗</span></a>
-            <button class="menu-icon-btn"
-                    onclick="toggleMenu()"
-                    aria-label="Open Navigation">
-                ☰
-            </button>
-        </div>
-
-    </nav>
-
-    <!-- Navigation Drawer -->
-    <aside class="dropdown-drawer" id="dropdownDrawer">
-
-        <div class="drawer-header">
-
-            <span>Navigation</span>
-
-            <button onclick="toggleMenu()" aria-label="Close Navigation">
-                ✕
-            </button>
-
-        </div>
-
-        <a href="home.html" class="drawer-item">
-            🏠 Home
-        </a>
-
-        <a href="home.html#about" class="drawer-item">
-            ❤️ About Us
-        </a>
-
-        <a href="home.html#gallery" class="drawer-item">
-            📷 Gallery
-        </a>
-
-        <a href="home.html#favourites" class="drawer-item">
-            ⭐ Favourites
-        </a>
-
-        <a href="home.html#visit" class="drawer-item">
-            📍 Find Us
-        </a>
-
-        <a href="home.html#visit" class="drawer-item">
-            ☎ Contact & Hours
-        </a>
-
-        <a id="menuWhatsapp" class="drawer-item" target="_blank" rel="noopener">
-            💬 WhatsApp Us
-        </a>
-
-        <a id="menuInstagram" class="drawer-item" target="_blank" rel="noopener">
-            📷 Instagram
-        </a>
-
-        <a id="menuFacebook" class="drawer-item" target="_blank" rel="noopener">
-            👍 Facebook
-        </a>
-
-        <a id="menuYoutube" class="drawer-item" target="_blank" rel="noopener">
-            ▶ YouTube
-        </a>
-
-        <a id="menuMap" class="drawer-item" target="_blank" rel="noopener">
-            📍 Get Directions
-        </a>
-
-    </aside>
-
-    <!-- Page Header -->
-    <header class="header">
-
-        <div class="header-content">
-
-            <p class="hero-tagline">
-                Happiness in Every Bite
-            </p>
-
-            <p class="hero-description">
-                Scan • Browse • Enjoy
-            </p>
-
-        </div>
-
-    </header>
+    <!-- Shared header (nav + drawer) -->
+    <div id="site-header"></div>
 
     <!-- Digital Menu -->
     <main class="menu-container">
@@ -207,6 +112,12 @@
         });
 
     </script>
+
+    <!-- Shared footer -->
+    <div id="site-footer"></div>
+
+    <!-- Client-side partial injector -->
+    <script src="js/includes.js" defer></script>
 
     <!-- Firebase Live Menu Loader Script -->
     <script type="module" src="js/menu-loader.js"></script>
