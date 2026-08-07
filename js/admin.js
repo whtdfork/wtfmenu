@@ -1,7 +1,7 @@
 // js/admin.js
 import { auth, db, storage } from "./firebase-config.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
 // DOM Elements
@@ -11,8 +11,9 @@ const navItems = document.querySelectorAll(".nav-item");
 const tabContents = document.querySelectorAll(".tab-content");
 const pageTitle = document.getElementById("pageTitle");
 
-// Categories list
-const categories = ["cover", "pizza", "momos", "desserts", "thankyou"];
+// Dynamic Limits & State
+const MAX_PAGES = 10;
+let menuPages = [];
 const selectedFiles = {};
 
 // 1. Auth Guard & Initial Data Fetch
@@ -25,8 +26,9 @@ onAuthStateChanged(auth, async (user) => {
         console.log("// Auth Guard Verified: Logged in as", user.email);
         userEmailDisplay.textContent = user.email;
         
-        // Load existing menu images from Firestore
-        await loadExistingMenu();
+        // Load dynamic menu pages and overall gallery
+        await loadDynamicMenu();
+        await loadExistingImages();
     }
 });
 
@@ -59,107 +61,238 @@ navItems.forEach((button) => {
         });
 
         pageTitle.textContent = button.textContent.trim();
+
+        if (targetTab === "gallery") {
+            loadExistingImages();
+        }
     });
 });
 
-// 4. Load Current Menu URLs from Firestore
-async function loadExistingMenu() {
+// 4. Load Dynamic Menu Pages from Firestore & Sort by Order
+async function loadDynamicMenu() {
     try {
-        const menuDocRef = doc(db, "menu", "cards");
+        const menuDocRef = doc(db, "menu", "dynamic_cards");
         const docSnap = await getDoc(menuDocRef);
 
-        if (docSnap.exists()) {
-            const data = docSnap.data();
-            categories.forEach((cat) => {
-                if (data[cat]) {
-                    renderPreview(cat, data[cat]);
-                }
-            });
-            console.log("// Menu metadata loaded from Firestore:", data);
+        if (docSnap.exists() && docSnap.data().pages) {
+            menuPages = docSnap.data().pages;
+            // Sort explicitly by order position
+            menuPages.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+            console.log(`// Dynamic menu loaded & ordered with ${menuPages.length} pages.`);
         } else {
+            // Default initial state with 1 cover card if database is empty
+            menuPages = [
+                { id: "page_1", order: 0, title: "Cover Page", url: "", uploadedBy: "", uploadedAt: "" }
+            ];
+            console.log("// No dynamic cards document found in Firestore. Created default cover card.");
+        }
+
+        renderMenuGrid();
+    } catch (error) {
+        console.error("// Error fetching dynamic menu data:", error);
+    }
+}
+
+// 5. Render Dynamic Menu Grid UI
+function renderMenuGrid() {
+    const gridContainer = document.getElementById("menuGridContainer");
+    if (!gridContainer) return;
+
+    // Re-index order before rendering to ensure 0-based sequence
+    menuPages.forEach((page, index) => {
+        page.order = index;
+    });
+
+    gridContainer.innerHTML = menuPages.map((page, index) => `
+        <div class="menu-card" id="card-${page.id}" style="border: 1px solid #ddd; padding: 16px; border-radius: 8px; background: #fff;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <span style="font-size: 0.8rem; background: #e9ecef; padding: 2px 6px; border-radius: 4px; font-weight: bold; color: #495057;">Page ${index + 1}</span>
+                <input type="text" value="${page.title}" class="page-title-input" 
+                       onchange="window.updatePageTitle('${page.id}', this.value)" 
+                       style="font-weight: bold; font-size: 0.95rem; width: 55%; padding: 4px; border: 1px solid #ccc; border-radius: 4px;" />
+                ${menuPages.length > 1 ? `<button onclick="window.deletePage('${page.id}')" style="color: #dc3545; border: none; background: none; cursor: pointer; font-weight: bold;">🗑️ Delete</button>` : ''}
+            </div>
+
+            <div class="image-preview" style="min-height: 150px; background: #f8f9fa; display: flex; align-items: center; justify-content: center; border: 1px dashed #ccc; border-radius: 4px; overflow: hidden;">
+                ${page.url ? `<img src="${page.url}" alt="${page.title}" style="width: 100%; height: 160px; object-fit: cover;" />` : '<span class="placeholder-text" style="color: #6c757d;">No image loaded</span>'}
+            </div>
+
+            <div class="card-meta" style="margin: 10px 0; font-size: 0.85rem; color: #555;">
+                ${page.uploadedBy ? `<small>By: ${page.uploadedBy}<br>Date: ${page.uploadedAt}</small>` : '<small>Not uploaded yet</small>'}
+            </div>
+
+            <div class="card-actions" style="display: flex; gap: 8px;">
+                <input type="file" id="file-${page.id}" accept="image/*" class="file-input" style="display: none;" onchange="window.handleFileSelect('${page.id}', event)" />
+                <button class="upload-btn" onclick="document.getElementById('file-${page.id}').click()" style="padding: 6px 12px; cursor: pointer;">Choose Image</button>
+                <button class="save-btn" id="btn-${page.id}" disabled onclick="window.uploadPageImage('${page.id}')" style="padding: 6px 12px; cursor: pointer;">Replace & Save</button>
+            </div>
+            <div class="status-msg" id="status-${page.id}" style="font-size: 0.8rem; margin-top: 6px; color: #28a745;"></div>
+        </div>
+    `).join("");
+
+    // Update Add Page Button State
+    const addBtn = document.getElementById("addPageBtn");
+    if (addBtn) {
+        addBtn.disabled = menuPages.length >= MAX_PAGES;
+        addBtn.textContent = menuPages.length >= MAX_PAGES ? `Max Limit Reached (${MAX_PAGES}/${MAX_PAGES})` : `＋ Add New Page (${menuPages.length}/${MAX_PAGES})`;
+        addBtn.style.opacity = menuPages.length >= MAX_PAGES ? "0.6" : "1";
+        addBtn.style.cursor = menuPages.length >= MAX_PAGES ? "not-allowed" : "pointer";
+    }
+}
+
+// 6. Global Window Handlers for Dynamic Card Interaction
+window.addPage = async function() {
+    if (menuPages.length >= MAX_PAGES) return;
+
+    const newPage = {
+        id: `page_${Date.now()}`,
+        order: menuPages.length, // Assign sequential order
+        title: `Menu Page ${menuPages.length + 1}`,
+        url: "",
+        uploadedBy: "",
+        uploadedAt: ""
+    };
+
+    menuPages.push(newPage);
+    await savePagesToFirestore();
+    renderMenuGrid();
+};
+
+window.updatePageTitle = async function(pageId, newTitle) {
+    const page = menuPages.find(p => p.id === pageId);
+    if (page) {
+        page.title = newTitle;
+        await savePagesToFirestore();
+        console.log(`// Updated page title for [${pageId}]: ${newTitle}`);
+    }
+};
+
+window.deletePage = async function(pageId) {
+    if (!confirm("Are you sure you want to delete this menu page?")) return;
+
+    menuPages = menuPages.filter(p => p.id !== pageId);
+    delete selectedFiles[pageId];
+
+    // Re-index remaining pages order sequentially
+    menuPages.forEach((page, index) => {
+        page.order = index;
+    });
+
+    await savePagesToFirestore();
+    renderMenuGrid();
+    console.log(`// Page deleted [${pageId}]. Remaining count: ${menuPages.length}`);
+};
+
+window.handleFileSelect = function(pageId, event) {
+    const file = event.target.files[0];
+    if (file) {
+        selectedFiles[pageId] = file;
+        const saveBtn = document.getElementById(`btn-${pageId}`);
+        if (saveBtn) saveBtn.disabled = false;
+
+        // Show temporary local preview
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const cardElement = document.getElementById(`card-${pageId}`);
+            if (cardElement) {
+                const previewContainer = cardElement.querySelector(".image-preview");
+                if (previewContainer) {
+                    previewContainer.innerHTML = `<img src="${e.target.result}" style="width: 100%; height: 160px; object-fit: cover;" />`;
+                }
+            }
+        };
+        reader.readAsDataURL(file);
+    }
+};
+
+window.uploadPageImage = async function(pageId) {
+    const file = selectedFiles[pageId];
+    const user = auth.currentUser;
+    if (!file || !user) return;
+
+    const saveBtn = document.getElementById(`btn-${pageId}`);
+    const statusMsg = document.getElementById(`status-${pageId}`);
+    if (saveBtn) saveBtn.disabled = true;
+    if (statusMsg) statusMsg.textContent = "Uploading...";
+
+    const timestamp = Date.now();
+    const storagePath = `menu/${pageId}_${timestamp}_${file.name}`;
+    const storageRef = ref(storage, storagePath);
+
+    try {
+        // 1. Storage Upload
+        const snapshot = await uploadBytes(storageRef, file);
+        const downloadURL = await getDownloadURL(snapshot.ref);
+
+        // 2. Local State Update
+        const page = menuPages.find(p => p.id === pageId);
+        if (page) {
+            page.url = downloadURL;
+            page.uploadedBy = user.email;
+            page.uploadedAt = new Date().toLocaleString();
+            page.storagePath = storagePath;
+        }
+
+        // 3. Firestore Sync
+        await savePagesToFirestore();
+        console.log(`// Storage & Firestore Updated [${pageId}]: Saved by ${user.email}`);
+
+        if (statusMsg) statusMsg.textContent = "Saved successfully!";
+        renderMenuGrid();
+        await loadExistingImages();
+
+    } catch (error) {
+        console.error("// Error uploading page image:", error);
+        if (statusMsg) statusMsg.textContent = "Upload failed.";
+    }
+};
+
+// Helper: Sync Dynamic Pages Array to Firestore with explicit ordering
+async function savePagesToFirestore() {
+    const user = auth.currentUser;
+    const menuDocRef = doc(db, "menu", "dynamic_cards");
+
+    // Ensure array is sorted by order before saving
+    menuPages.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+
+    await setDoc(menuDocRef, {
+        pages: menuPages,
+        lastUpdatedBy: user ? user.email : "system",
+        lastUpdatedAt: serverTimestamp()
+    }, { merge: true });
+}
+
+// Function to fetch and render overall image audit gallery tab
+async function loadExistingImages() {
+    try {
+        const menuMetaRef = doc(db, "menu", "dynamic_cards");
+        const docSnap = await getDoc(menuMetaRef);
+
+        const galleryContainer = document.getElementById("imageGallery");
+        if (!galleryContainer) return;
+
+        if (docSnap.exists() && docSnap.data().pages) {
+            const pagesWithImages = docSnap.data().pages.filter(p => p.url);
+            console.log(`// Gallery loaded ${pagesWithImages.length} uploaded images.`);
+
+            if (pagesWithImages.length === 0) {
+                galleryContainer.innerHTML = "<p class='muted'>No uploaded images present yet.</p>";
+                return;
+            }
+
+            galleryContainer.innerHTML = pagesWithImages.map(img => `
+                <div class="image-card" id="${img.id}" style="border: 1px solid #ddd; padding: 10px; border-radius: 8px; background: #fff;">
+                    <img src="${img.url}" style="width: 100%; height: 140px; object-fit: cover; border-radius: 4px;" />
+                    <p style="margin: 8px 0 4px 0;"><strong>Title:</strong> ${img.title} (Page ${img.order + 1})</p>
+                    <p style="margin: 0;"><small><strong>By:</strong> ${img.uploadedBy}</small></p>
+                    <p style="margin: 0;"><small><strong>Date:</strong> ${img.uploadedAt}</small></p>
+                </div>
+            `).join("");
+        } else {
+            galleryContainer.innerHTML = "<p class='muted'>No uploaded images present yet.</p>";
             console.log("// No menu metadata document found in Firestore yet.");
         }
     } catch (error) {
-        console.error("// Error fetching menu data:", error);
-    }
-}
-
-// 5. Setup Event Listeners for Upload Cards
-categories.forEach((cat) => {
-    const fileInput = document.getElementById(`file-${cat}`);
-    const saveBtn = document.getElementById(`btn-${cat}`);
-
-    if (!fileInput || !saveBtn) return;
-
-    // Handle Local File Selection & Local Preview
-    fileInput.addEventListener("change", (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            selectedFiles[cat] = file;
-            saveBtn.disabled = false;
-            
-            // Show temporary local preview
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                renderPreview(cat, event.target.result);
-            };
-            reader.readAsDataURL(file);
-        }
-    });
-
-    // Handle Replace & Save Click
-    saveBtn.addEventListener("click", async () => {
-        await uploadMenuImage(cat);
-    });
-});
-
-// 6. Upload Image to Storage & Update Firestore
-async function uploadMenuImage(category) {
-    const file = selectedFiles[category];
-    const saveBtn = document.getElementById(`btn-${category}`);
-    const statusMsg = document.getElementById(`status-${category}`);
-
-    if (!file) return;
-
-    saveBtn.disabled = true;
-    saveBtn.textContent = "Uploading...";
-    statusMsg.className = "status-msg";
-    statusMsg.textContent = "Saving to Firebase...";
-
-    try {
-        // Upload file to Firebase Storage under menu/category.jpg
-        const fileExtension = file.name.split('.').pop();
-        const storageRef = ref(storage, `menu/${category}.${fileExtension}`);
-        
-        await uploadBytes(storageRef, file);
-        const downloadURL = await getDownloadURL(storageRef);
-        console.log(`// Storage Upload Success [${category}]:`, downloadURL);
-
-        // Save download URL to Firestore in 'menu' collection, document 'cards'
-        const menuDocRef = doc(db, "menu", "cards");
-        await setDoc(menuDocRef, { [category]: downloadURL }, { merge: true });
-        console.log(`// Firestore Updated [${category}]`);
-
-        // UI Reset & Feedback
-        saveBtn.textContent = "Replace & Save";
-        saveBtn.disabled = true;
-        statusMsg.className = "status-msg success";
-        statusMsg.textContent = "Saved successfully!";
-        
-        delete selectedFiles[category];
-    } catch (error) {
-        console.error(`// Upload Error [${category}]:`, error);
-        saveBtn.disabled = false;
-        saveBtn.textContent = "Replace & Save";
-        statusMsg.className = "status-msg error";
-        statusMsg.textContent = "Failed to upload.";
-    }
-}
-
-// Helper: Render Image in Card Preview Container
-function renderPreview(category, imageSrc) {
-    const previewContainer = document.getElementById(`preview-${category}`);
-    if (previewContainer) {
-        previewContainer.innerHTML = `<img src="${imageSrc}" alt="${category} menu">`;
+        console.error("// Error loading gallery images:", error);
     }
 }

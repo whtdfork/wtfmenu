@@ -46,83 +46,21 @@
             </header>
 
             <div class="content-body">
-                <!-- Tab 1: Menu Images -->
+                <!-- Tab 1: Dynamic Menu Images -->
                 <section id="tab-menu-images" class="tab-content active">
-                    <div class="section-intro">
-                        <h3>Manage Menu Cards</h3>
-                        <p>Upload new menu images to replace current ones live on the website.</p>
+                    <div class="section-intro" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <div>
+                            <h3>Manage Dynamic Menu Cards</h3>
+                            <p>Add, edit, or remove menu cards dynamically (up to 10 max).</p>
+                        </div>
+                        <button id="addPageBtn" onclick="window.addPage()" style="padding: 10px 16px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
+                            ＋ Add New Page
+                        </button>
                     </div>
 
-                    <div class="menu-grid">
-                        <!-- Cover Card -->
-                        <div class="menu-card" data-category="cover">
-                            <h4>Cover Menu</h4>
-                            <div class="image-preview" id="preview-cover">
-                                <span class="placeholder-text">No image loaded</span>
-                            </div>
-                            <div class="card-actions">
-                                <input type="file" id="file-cover" accept="image/*" class="file-input">
-                                <button class="upload-btn" onclick="document.getElementById('file-cover').click()">Choose Image</button>
-                                <button class="save-btn" id="btn-cover" disabled>Replace & Save</button>
-                            </div>
-                            <div class="status-msg" id="status-cover"></div>
-                        </div>
-
-                        <!-- Pizza Card -->
-                        <div class="menu-card" data-category="pizza">
-                            <h4>Pizza Menu</h4>
-                            <div class="image-preview" id="preview-pizza">
-                                <span class="placeholder-text">No image loaded</span>
-                            </div>
-                            <div class="card-actions">
-                                <input type="file" id="file-pizza" accept="image/*" class="file-input">
-                                <button class="upload-btn" onclick="document.getElementById('file-pizza').click()">Choose Image</button>
-                                <button class="save-btn" id="btn-pizza" disabled>Replace & Save</button>
-                            </div>
-                            <div class="status-msg" id="status-pizza"></div>
-                        </div>
-
-                        <!-- Momos Card -->
-                        <div class="menu-card" data-category="momos">
-                            <h4>Momos Menu</h4>
-                            <div class="image-preview" id="preview-momos">
-                                <span class="placeholder-text">No image loaded</span>
-                            </div>
-                            <div class="card-actions">
-                                <input type="file" id="file-momos" accept="image/*" class="file-input">
-                                <button class="upload-btn" onclick="document.getElementById('file-momos').click()">Choose Image</button>
-                                <button class="save-btn" id="btn-momos" disabled>Replace & Save</button>
-                            </div>
-                            <div class="status-msg" id="status-momos"></div>
-                        </div>
-
-                        <!-- Desserts Card -->
-                        <div class="menu-card" data-category="desserts">
-                            <h4>Desserts Menu</h4>
-                            <div class="image-preview" id="preview-desserts">
-                                <span class="placeholder-text">No image loaded</span>
-                            </div>
-                            <div class="card-actions">
-                                <input type="file" id="file-desserts" accept="image/*" class="file-input">
-                                <button class="upload-btn" onclick="document.getElementById('file-desserts').click()">Choose Image</button>
-                                <button class="save-btn" id="btn-desserts" disabled>Replace & Save</button>
-                            </div>
-                            <div class="status-msg" id="status-desserts"></div>
-                        </div>
-
-                        <!-- Thank You Card -->
-                        <div class="menu-card" data-category="thankyou">
-                            <h4>Thank You Page</h4>
-                            <div class="image-preview" id="preview-thankyou">
-                                <span class="placeholder-text">No image loaded</span>
-                            </div>
-                            <div class="card-actions">
-                                <input type="file" id="file-thankyou" accept="image/*" class="file-input">
-                                <button class="upload-btn" onclick="document.getElementById('file-thankyou').click()">Choose Image</button>
-                                <button class="save-btn" id="btn-thankyou" disabled>Replace & Save</button>
-                            </div>
-                            <div class="status-msg" id="status-thankyou"></div>
-                        </div>
+                    <!-- Dynamic Menu Grid Container (populated via admin.js) -->
+                    <div class="menu-grid" id="menuGridContainer" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px;">
+                        <!-- Cards are dynamically injected here -->
                     </div>
                 </section>
 
@@ -152,10 +90,10 @@
                 <section id="tab-gallery" class="tab-content">
                     <div class="section-intro">
                         <h3>Gallery</h3>
-                        <p>Upload multi-photo food and restaurant gallery pictures.</p>
+                        <p>History of all uploaded images with audit details.</p>
                     </div>
-                    <div class="placeholder-box">
-                        <p class="muted">Coming soon in Part 8.</p>
+                    <div id="imageGallery" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; margin-top: 20px;">
+                        <p class="muted">Loading images...</p>
                     </div>
                 </section>
 
@@ -173,7 +111,7 @@
         </main>
     </div>
 
-    <!-- Admin Logic script -->
+    <!-- Admin Logic Script -->
     <script type="module" src="../js/admin.js"></script>
 </body>
 </html>
