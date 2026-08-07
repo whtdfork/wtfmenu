@@ -20,8 +20,7 @@ const selectedFiles = {};
 function autoIndexPages(pages) {
     return pages.map((page, index) => ({
         ...page,
-        order: index,
-        title: page.title || `Page ${index + 1}`
+        order: index
     }));
 }
 
@@ -47,6 +46,7 @@ onAuthStateChanged(auth, async (user) => {
         
         await loadDynamicMenu();
         await loadExistingImages();
+        setupImageModal();
     }
 });
 
@@ -97,7 +97,7 @@ async function loadDynamicMenu() {
             console.log(`// Dynamic menu loaded with ${menuPages.length} pages.`);
         } else {
             menuPages = [
-                { id: "page_1", order: 0, title: "Cover Page", url: "", storagePath: "", uploadedBy: "", uploadedAt: "" }
+                { id: "page_1", order: 0, url: "", storagePath: "", uploadedBy: "", uploadedAt: "" }
             ];
             console.log("// No dynamic cards document found in Firestore. Created default cover card.");
         }
@@ -119,30 +119,25 @@ function renderMenuGrid() {
         <div class="menu-card" id="card-${page.id}" style="border: 1px solid #ddd; padding: 16px; border-radius: 8px; background: #fff;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                 <div style="display: flex; align-items: center; gap: 8px;">
-                    <span style="font-size: 0.8rem; background: #e9ecef; padding: 2px 6px; border-radius: 4px; font-weight: bold; color: #495057;">Slot ${index + 1}</span>
-                    <!-- Position Switcher Dropdown -->
-                    <select onchange="window.movePage('${page.id}', parseInt(this.value))" style="font-size: 0.8rem; padding: 2px;">
+                    <span style="font-size: 0.85rem; background: #007bff; color: #fff; padding: 3px 8px; border-radius: 4px; font-weight: bold;">Slot ${index + 1}</span>
+                    <select onchange="window.movePage('${page.id}', parseInt(this.value))" style="font-size: 0.8rem; padding: 3px; border-radius: 4px; border: 1px solid #ccc;">
                         ${menuPages.map((_, targetIndex) => `
                             <option value="${targetIndex}" ${targetIndex === index ? "selected" : ""}>
-                                Move to Slot ${targetIndex + 1}
+                                Move to Position ${targetIndex + 1}
                             </option>
                         `).join('')}
                     </select>
                 </div>
                 
-                <input type="text" value="${page.title}" placeholder="Item Title" class="page-title-input" 
-                       onchange="window.updatePageTitle('${page.id}', this.value)" 
-                       style="font-weight: bold; font-size: 0.95rem; width: 40%; padding: 4px; border: 1px solid #ccc; border-radius: 4px;" />
-                       
                 ${menuPages.length > 1 ? `<button onclick="window.deletePage('${page.id}')" style="color: #dc3545; border: none; background: none; cursor: pointer; font-weight: bold;">🗑️ Delete</button>` : ''}
             </div>
 
-            <div class="image-preview" style="min-height: 150px; background: #f8f9fa; display: flex; align-items: center; justify-content: center; border: 1px dashed #ccc; border-radius: 4px; overflow: hidden;">
-                ${page.url ? `<img src="${page.url}" alt="${page.title}" style="width: 100%; height: 160px; object-fit: cover;" />` : '<span class="placeholder-text" style="color: #6c757d;">No image loaded</span>'}
+            <div class="image-preview" style="min-height: 160px; background: #f8f9fa; display: flex; align-items: center; justify-content: center; border: 1px dashed #ccc; border-radius: 6px; overflow: hidden; cursor: pointer;" onclick="window.openImageModal('${page.url}')">
+                ${page.url ? `<img src="${page.url}" alt="Slot ${index + 1}" style="width: 100%; height: 160px; object-fit: cover; transition: transform 0.2s;" title="Click to view full screen" />` : '<span class="placeholder-text" style="color: #6c757d;">No image uploaded (Click Choose Image)</span>'}
             </div>
 
             <div class="card-meta" style="margin: 10px 0; font-size: 0.85rem; color: #555;">
-                ${page.uploadedBy ? `<small>By: ${page.uploadedBy}<br>Date: ${page.uploadedAt}</small>` : '<small>Not uploaded yet</small>'}
+                ${page.uploadedBy ? `<small>By: ${page.uploadedBy}<br>Date: ${page.uploadedAt}</small>` : '<small>Status: Empty slot</small>'}
             </div>
 
             <div class="card-actions" style="display: flex; gap: 8px;">
@@ -170,7 +165,6 @@ window.addPage = async function() {
     const newPage = {
         id: `page_${Date.now()}`,
         order: menuPages.length,
-        title: `Page ${menuPages.length + 1}`,
         url: "",
         storagePath: "",
         uploadedBy: "",
@@ -186,7 +180,6 @@ window.movePage = async function(pageId, newIndex) {
     const currentIndex = menuPages.findIndex(p => p.id === pageId);
     if (currentIndex === -1 || newIndex === currentIndex) return;
 
-    // Remove page from old index and insert into target index
     const [movedPage] = menuPages.splice(currentIndex, 1);
     menuPages.splice(newIndex, 0, movedPage);
 
@@ -195,26 +188,15 @@ window.movePage = async function(pageId, newIndex) {
     console.log(`// Moved page [${pageId}] from Slot ${currentIndex + 1} to Slot ${newIndex + 1}`);
 };
 
-window.updatePageTitle = async function(pageId, newTitle) {
-    const page = menuPages.find(p => p.id === pageId);
-    if (page) {
-        page.title = newTitle;
-        await savePagesToFirestore();
-        console.log(`// Updated title for [${pageId}]: ${newTitle}`);
-    }
-};
-
 window.deletePage = async function(pageId) {
     if (!confirm("Are you sure you want to delete this menu page?")) return;
 
     const pageToDelete = menuPages.find(p => p.id === pageId);
 
-    // 1. Delete associated Storage file safely
     if (pageToDelete && pageToDelete.storagePath) {
         await safeDeleteStorageFile(pageToDelete.storagePath);
     }
 
-    // 2. Remove item from Firestore array
     menuPages = menuPages.filter(p => p.id !== pageId);
     delete selectedFiles[pageId];
 
@@ -236,7 +218,8 @@ window.handleFileSelect = function(pageId, event) {
             if (cardElement) {
                 const previewContainer = cardElement.querySelector(".image-preview");
                 if (previewContainer) {
-                    previewContainer.innerHTML = `<img src="${e.target.result}" style="width: 100%; height: 160px; object-fit: cover;" />`;
+                    previewContainer.innerHTML = `<img src="${e.target.result}" style="width: 100%; height: 160px; object-fit: cover;" title="Click to view full screen" />`;
+                    previewContainer.onclick = () => window.openImageModal(e.target.result);
                 }
             }
         };
@@ -256,7 +239,6 @@ window.uploadPageImage = async function(pageId) {
 
     const page = menuPages.find(p => p.id === pageId);
 
-    // Clean up existing old file from Firebase Storage before uploading new one
     if (page && page.storagePath) {
         await safeDeleteStorageFile(page.storagePath);
     }
@@ -284,6 +266,36 @@ window.uploadPageImage = async function(pageId) {
     } catch (error) {
         console.error("// Error uploading image:", error);
         if (statusMsg) statusMsg.textContent = "Upload failed.";
+    }
+};
+
+// 7. Full-Screen Dialog Lightbox Setup
+function setupImageModal() {
+    if (document.getElementById("imagePreviewModal")) return;
+
+    const modalHTML = `
+        <div id="imagePreviewModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 10000; justify-content: center; align-items: center; cursor: pointer;" onclick="window.closeImageModal()">
+            <span style="position: absolute; top: 20px; right: 30px; color: #fff; font-size: 2rem; font-weight: bold; cursor: pointer;">&times;</span>
+            <img id="modalPreviewImage" src="" style="max-width: 90%; max-height: 90%; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); object-fit: contain;" />
+        </div>
+    `;
+    document.body.insertAdjacentHTML("beforeend", modalHTML);
+}
+
+window.openImageModal = function(imgSrc) {
+    if (!imgSrc) return;
+    const modal = document.getElementById("imagePreviewModal");
+    const modalImg = document.getElementById("modalPreviewImage");
+    if (modal && modalImg) {
+        modalImg.src = imgSrc;
+        modal.style.display = "flex";
+    }
+};
+
+window.closeImageModal = function() {
+    const modal = document.getElementById("imagePreviewModal");
+    if (modal) {
+        modal.style.display = "none";
     }
 };
 
@@ -319,9 +331,9 @@ async function loadExistingImages() {
             }
 
             galleryContainer.innerHTML = pagesWithImages.map(img => `
-                <div class="image-card" id="${img.id}" style="border: 1px solid #ddd; padding: 10px; border-radius: 8px; background: #fff;">
+                <div class="image-card" id="${img.id}" style="border: 1px solid #ddd; padding: 10px; border-radius: 8px; background: #fff; cursor: pointer;" onclick="window.openImageModal('${img.url}')">
                     <img src="${img.url}" style="width: 100%; height: 140px; object-fit: cover; border-radius: 4px;" />
-                    <p style="margin: 8px 0 4px 0;"><strong>Title:</strong> ${img.title} (Slot ${img.order + 1})</p>
+                    <p style="margin: 8px 0 4px 0;"><strong>Position:</strong> Slot ${img.order + 1}</p>
                     <p style="margin: 0;"><small><strong>By:</strong> ${img.uploadedBy}</small></p>
                     <p style="margin: 0;"><small><strong>Date:</strong> ${img.uploadedAt}</small></p>
                 </div>
