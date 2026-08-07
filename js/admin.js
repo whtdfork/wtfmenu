@@ -2,7 +2,7 @@
 import { auth, db, storage } from "./firebase-config.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+import { ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
 // DOM Elements
 const userEmailDisplay = document.getElementById("userEmail");
@@ -167,19 +167,35 @@ window.updatePageTitle = async function(pageId, newTitle) {
     }
 };
 
+// Edited: Safely delete storage object using storagePath reference
 window.deletePage = async function(pageId) {
     if (!confirm("Are you sure you want to delete this menu page?")) return;
 
+    const pageToDelete = menuPages.find(p => p.id === pageId);
+
+    // Delete image from Storage using clean path reference
+    if (pageToDelete && pageToDelete.storagePath) {
+        try {
+            const oldStorageRef = ref(storage, pageToDelete.storagePath);
+            await deleteObject(oldStorageRef);
+            console.log(`// Deleted image from Firebase Storage: ${pageToDelete.storagePath}`);
+        } catch (storageErr) {
+            console.warn("// Could not delete image from Storage or file missing:", storageErr);
+        }
+    }
+
+    // Filter out page and cleanup selection
     menuPages = menuPages.filter(p => p.id !== pageId);
     delete selectedFiles[pageId];
 
-    // Re-index remaining pages order sequentially
+    // Re-index remaining pages order sequentially (0, 1, 2...)
     menuPages.forEach((page, index) => {
         page.order = index;
     });
 
     await savePagesToFirestore();
     renderMenuGrid();
+    await loadExistingImages();
     console.log(`// Page deleted [${pageId}]. Remaining count: ${menuPages.length}`);
 };
 
@@ -205,6 +221,7 @@ window.handleFileSelect = function(pageId, event) {
     }
 };
 
+// Safely replace old file using clean storagePath reference
 window.uploadPageImage = async function(pageId) {
     const file = selectedFiles[pageId];
     const user = auth.currentUser;
@@ -214,6 +231,19 @@ window.uploadPageImage = async function(pageId) {
     const statusMsg = document.getElementById(`status-${pageId}`);
     if (saveBtn) saveBtn.disabled = true;
     if (statusMsg) statusMsg.textContent = "Uploading...";
+
+    const page = menuPages.find(p => p.id === pageId);
+
+    // Delete existing old image from Storage before uploading new image to prevent duplicates
+    if (page && page.storagePath) {
+        try {
+            const oldStorageRef = ref(storage, page.storagePath);
+            await deleteObject(oldStorageRef);
+            console.log(`// Deleted existing old image from Firebase Storage: ${page.storagePath}`);
+        } catch (storageErr) {
+            console.warn("// Old image delete failed or file not found in Storage:", storageErr);
+        }
+    }
 
     const timestamp = Date.now();
     const storagePath = `menu/${pageId}_${timestamp}_${file.name}`;
@@ -225,7 +255,6 @@ window.uploadPageImage = async function(pageId) {
         const downloadURL = await getDownloadURL(snapshot.ref);
 
         // 2. Local State Update
-        const page = menuPages.find(p => p.id === pageId);
         if (page) {
             page.url = downloadURL;
             page.uploadedBy = user.email;

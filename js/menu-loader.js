@@ -15,7 +15,8 @@ function listenForMenuUpdates() {
         return;
     }
 
-    const menuDocRef = doc(doc(db, "menu", "dynamic_cards"));
+    // Edited: Fixed double doc() wrapper bug
+    const menuDocRef = doc(db, "menu", "dynamic_cards");
 
     onSnapshot(menuDocRef, (docSnap) => {
         if (docSnap.exists() && docSnap.data().pages) {
