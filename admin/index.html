@@ -98,15 +98,62 @@
     </div>
 
     <div class="moments-grid" id="momentsGrid">
-        <!-- Everyday Welcome Template Card -->
-        <div class="moment-card active-moment">
-            <span class="active-badge" id="momentBadge">Active</span>
-            <h4>Everyday Warm Welcome</h4>
-            <p class="muted">Displays a warm welcome message and inspirational quote when customers scan the menu.</p>
-            
-            <div class="card-actions">
-                <button class="upload-btn" type="button" onclick="window.MomentsEngine.renderActiveMoment()">Preview</button>
-                <button class="save-btn" id="toggleMomentBtn" type="button" onclick="window.toggleMomentStatus()">Active</button>
+        <div class="moment-card active-moment" style="max-width: 650px; background: #ffffff; padding: 20px; border-radius: 12px; border: 1px solid #e0e0e0;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h4 style="font-size: 1.2rem; font-weight: 700;">Occasion Greeting Overlay</h4>
+                <span class="active-badge" id="momentBadge">ACTIVE</span>
+            </div>
+
+            <!-- Configuration Form -->
+            <div class="moment-form" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
+                <div>
+                    <label style="font-weight: 600; display: block; margin-bottom: 4px;">Occasion / Theme:</label>
+                    <select id="momentThemeSelect" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;">
+                        <option value="welcome">Everyday Welcome 🍽️</option>
+                        <option value="diwali">Diwali Festival 🪔</option>
+                        <option value="holi">Holi Festival of Colors 🎨</option>
+                        <option value="birthday">Birthday Celebration 🎉</option>
+                        <option value="newyear">Happy New Year 🎆</option>
+                        <option value="christmas">Merry Christmas 🎄</option>
+                        <option value="republic">Republic Day / Independence Day 🇮🇳</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label style="font-weight: 600; display: block; margin-bottom: 4px;">Title:</label>
+                    <input type="text" id="momentTitleInput" placeholder="e.g. Happy Diwali!" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;" />
+                </div>
+
+                <div>
+                    <label style="font-weight: 600; display: block; margin-bottom: 4px;">Subtitle / Message:</label>
+                    <textarea id="momentSubtitleInput" rows="3" placeholder="e.g. Wishing you prosperity and delicious moments!" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;"></textarea>
+                </div>
+
+                <div>
+                    <label style="font-weight: 600; display: block; margin-bottom: 4px;">Lottie Animation JSON URL:</label>
+                    <input type="url" id="momentLottieInput" placeholder="https://assets.lottiefiles.com/.../data.json" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;" />
+                </div>
+
+                <div>
+                    <label style="font-weight: 600; display: block; margin-bottom: 4px;">Banner Image URL (Optional):</label>
+                    <input type="url" id="momentImageInput" placeholder="https://..." style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;" />
+                </div>
+
+                <div>
+                    <label style="font-weight: 600; display: block; margin-bottom: 4px;">Background Music/Audio URL (Optional):</label>
+                    <input type="url" id="momentAudioInput" placeholder="https://.../music.mp3" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;" />
+                </div>
+
+                <div>
+                    <label style="font-weight: 600; display: block; margin-bottom: 4px;">Overlay Duration (ms):</label>
+                    <input type="number" id="momentDurationInput" value="4000" step="500" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;" />
+                </div>
+            </div>
+
+            <div class="card-actions" style="display: flex; gap: 10px;">
+                <button class="upload-btn" type="button" onclick="window.saveMomentConfig()" id="saveMomentConfigBtn" style="background: #28a745; color: white; border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-weight: 600;">Save Settings</button>
+                <button class="upload-btn" type="button" onclick="window.MomentsEngine.renderActiveMoment()" style="background: #6c757d; color: white; border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-weight: 600;">Preview</button>
+                <button class="save-btn" id="toggleMomentBtn" type="button" onclick="window.toggleMomentStatus()" style="padding: 10px 18px; border-radius: 6px; cursor: pointer; font-weight: 600;">Deactivate</button>
             </div>
         </div>
     </div>
