@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WHT D FORK - Admin Panel</title>
     <link rel="stylesheet" href="../css/admin.css">
+    <link rel="stylesheet" href="../css/moments.css">
 </head>
 <body>
     <div class="admin-wrapper">
@@ -24,6 +25,9 @@
                 </button>
                 <button class="nav-item" data-tab="restaurant-info">
                     <span class="icon">ℹ️</span> Restaurant Info
+                </button>
+                <button class="nav-item" data-tab="moments">
+                    <span class="icon">⭐</span> Moments
                 </button>
                 <button class="nav-item" data-tab="gallery">
                     <span class="icon">📷</span> Gallery
@@ -86,7 +90,29 @@
                     </div>
                 </section>
 
-                <!-- Tab 4: Gallery -->
+<!-- Tab 4: Moments ⭐ -->
+<section id="tab-moments" class="tab-content">
+    <div class="section-intro">
+        <h3>Moments Engine ⭐</h3>
+        <p>Manage warm welcomes, festival greetings, and special occasion overlays for your customers.</p>
+    </div>
+
+    <div class="moments-grid" id="momentsGrid">
+        <!-- Everyday Welcome Template Card -->
+        <div class="moment-card active-moment">
+            <span class="active-badge" id="momentBadge">Active</span>
+            <h4>Everyday Warm Welcome</h4>
+            <p class="muted">Displays a warm welcome message and inspirational quote when customers scan the menu.</p>
+            
+            <div class="card-actions">
+                <button class="upload-btn" type="button" onclick="window.MomentsEngine.renderActiveMoment()">Preview</button>
+                <button class="save-btn" id="toggleMomentBtn" type="button" onclick="window.toggleMomentStatus()">Active</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+                <!-- Tab 5: Gallery -->
                 <section id="tab-gallery" class="tab-content">
                     <div class="section-intro">
                         <h3>Gallery</h3>
@@ -97,7 +123,7 @@
                     </div>
                 </section>
 
-                <!-- Tab 5: Opening Hours -->
+                <!-- Tab 6: Opening Hours -->
                 <section id="tab-opening-hours" class="tab-content">
                     <div class="section-intro">
                         <h3>Opening Hours</h3>
@@ -110,6 +136,9 @@
             </div>
         </main>
     </div>
+
+<!-- Moments Module Script -->
+    <script type="module" src="../js/moments.js"></script>
 
     <!-- Admin Logic Script -->
     <script type="module" src="../js/admin.js"></script>

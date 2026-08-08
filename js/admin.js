@@ -1,7 +1,7 @@
 // js/admin.js
 import { auth, db, storage } from "./firebase-config.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { doc, getDoc, setDoc, serverTimestamp, collection, getDocs, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js"; // Added collection, getDocs, updateDoc, deleteDoc for Moments
 import { ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
 // DOM Elements
@@ -15,6 +15,7 @@ const pageTitle = document.getElementById("pageTitle");
 const MAX_PAGES = 10;
 let menuPages = [];
 const selectedFiles = {};
+let momentsList = []; // Added local state for moments
 
 // Helper: Normalize array order (0, 1, 2...) automatically before saving or rendering
 function autoIndexPages(pages) {
@@ -46,6 +47,7 @@ onAuthStateChanged(auth, async (user) => {
         
         await loadDynamicMenu();
         await loadExistingImages();
+        await loadMoments(); // Added loadMoments call
         setupImageModal();
     }
 });
@@ -67,21 +69,52 @@ navItems.forEach((button) => {
     button.addEventListener("click", () => {
         const targetTab = button.getAttribute("data-tab");
 
+        // Remove active class from all nav items & tab contents
         navItems.forEach((btn) => btn.classList.remove("active"));
+        tabContents.forEach((content) => content.classList.remove("active"));
+
+        // Set clicked nav item as active
         button.classList.add("active");
 
-        tabContents.forEach((content) => {
-            if (content.id === `tab-${targetTab}`) {
-                content.classList.add("active");
-            } else {
-                content.classList.remove("active");
-            }
-        });
+        // Show target tab content
+        const activeTabContent = document.getElementById(`tab-${targetTab}`);
+        if (activeTabContent) {
+            activeTabContent.classList.add("active");
+        }
 
-        pageTitle.textContent = button.textContent.trim();
+        // Update top header title dynamically
+        if (pageTitle) {
+            switch (targetTab) {
+                case 'menu-images':
+                    pageTitle.textContent = 'Menu Images';
+                    break;
+                case 'today-offer':
+                    pageTitle.textContent = "Today's Offer";
+                    break;
+                case 'restaurant-info':
+                    pageTitle.textContent = 'Restaurant Info';
+                    break;
+                case 'moments':
+                    pageTitle.textContent = 'Moments ⭐';
+                    break;
+                case 'gallery':
+                    pageTitle.textContent = 'Gallery';
+                    break;
+                case 'opening-hours':
+                    pageTitle.textContent = 'Opening Hours';
+                    break;
+                default:
+                    pageTitle.textContent = 'Admin Panel';
+            }
+        }
 
         if (targetTab === "gallery") {
             loadExistingImages();
+        }
+        
+        // Trigger moments data load on tab switch
+        if (targetTab === "moments") {
+            loadMoments();
         }
     });
 });
@@ -345,3 +378,106 @@ async function loadExistingImages() {
         console.error("// Error loading gallery images:", error);
     }
 }
+
+// ==========================================
+// 8. MOMENTS MODULE (Step 4: Firestore Document Integration)
+// ==========================================
+
+// Fetch and render Moments collection from Firestore
+async function loadMoments() {
+    try {
+        console.log("// Moments: Fetching moments collection from Firestore...");
+        const momentsRef = collection(db, "moments");
+        const snapshot = await getDocs(momentsRef);
+
+        momentsList = [];
+        snapshot.forEach((docSnap) => {
+            momentsList.push({ id: docSnap.id, ...docSnap.data() });
+        });
+
+        console.log(`// Moments: Loaded ${momentsList.length} moments.`);
+        renderMomentsList();
+    } catch (error) {
+        console.error("// Moments Error: Failed to fetch moments from Firestore", error);
+    }
+}
+
+// Render Moments UI list inside #momentsContainer
+function renderMomentsList() {
+    const container = document.getElementById("momentsContainer");
+    if (!container) return;
+
+    if (momentsList.length === 0) {
+        container.innerHTML = `<p class="muted">No moments configured yet. Click "Add New Moment" below to create one.</p>`;
+        return;
+    }
+
+    container.innerHTML = momentsList.map((moment) => `
+        <div class="moment-card" id="moment-${moment.id}" style="border: 1px solid #ccc; padding: 16px; border-radius: 8px; margin-bottom: 12px; background: #fff;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <h4 style="margin: 0;">${moment.title || "Untitled Moment"}</h4>
+                <div>
+                    <label style="font-size: 0.85rem; margin-right: 10px;">
+                        <input type="checkbox" ${moment.isActive ? "checked" : ""} onchange="window.toggleMomentActive('${moment.id}', this.checked)" /> Active
+                    </label>
+                    <button onclick="window.deleteMoment('${moment.id}')" style="color: #dc3545; border: none; background: none; cursor: pointer; font-weight: bold;">🗑️ Delete</button>
+                </div>
+            </div>
+            <p style="margin: 4px 0; color: #555; font-size: 0.9rem;"><strong>Subtitle:</strong> ${moment.subtitle || "N/A"}</p>
+            <p style="margin: 4px 0; color: #555; font-size: 0.9rem;"><strong>Theme:</strong> ${moment.theme || "default"}</p>
+        </div>
+    `).join("");
+}
+
+// Global Window Handler: Save or Update Moment Document
+window.saveMoment = async function(momentId, momentData) {
+    try {
+        const user = auth.currentUser;
+        const id = momentId || `moment_${Date.now()}`;
+        const momentRef = doc(db, "moments", id);
+
+        const payload = {
+            title: momentData.title || "",
+            subtitle: momentData.subtitle || "",
+            theme: momentData.theme || "default",
+            animation: momentData.animation || "fade",
+            isActive: momentData.isActive ?? true,
+            updatedBy: user ? user.email : "system",
+            updatedAt: serverTimestamp()
+        };
+
+        await setDoc(momentRef, payload, { merge: true });
+        console.log(`// Moments: Saved moment [${id}] successfully.`);
+        await loadMoments();
+    } catch (error) {
+        console.error("// Moments Error: Failed to save moment document", error);
+    }
+};
+
+// Global Window Handler: Toggle Active Status
+window.toggleMomentActive = async function(momentId, isActive) {
+    try {
+        const momentRef = doc(db, "moments", momentId);
+        await updateDoc(momentRef, {
+            isActive: isActive,
+            updatedAt: serverTimestamp()
+        });
+        console.log(`// Moments: Toggled active status for [${momentId}] to ${isActive}`);
+    } catch (error) {
+        console.error("// Moments Error: Failed to toggle active status", error);
+    }
+};
+
+// Global Window Handler: Delete Moment Document
+window.deleteMoment = async function(momentId) {
+    if (!confirm("Are you sure you want to delete this moment?")) return;
+
+    try {
+        const momentRef = doc(db, "moments", momentId);
+        await deleteDoc(momentRef);
+        console.log(`// Moments: Deleted moment document [${momentId}]`);
+        await loadMoments();
+    } catch (error) {
+        console.error("// Moments Error: Failed to delete moment document", error);
+    }
+};

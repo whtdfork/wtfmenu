@@ -14,6 +14,7 @@
       gtag('config', 'G-BHCMWL56VN');
     </script>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="css/moments.css">
     <script src="site-config.js" defer></script>
 </head>
 <body>
@@ -116,6 +117,9 @@
 
     </header>
 
+    <!-- Dynamic Moments Showcase Container -->
+    <div id="momentsContainer" class="moments-wrapper"></div>
+
     <!-- Dynamic Digital Menu Container -->
     <main class="menu-container" id="dynamicMenuContainer">
         <!-- Live Firebase images load dynamically here -->
@@ -175,6 +179,9 @@
         });
 
     </script>
+
+    <!-- Dynamic Moments Loader -->
+    <script type="module" src="js/moments.js"></script>
 
     <!-- Dynamic Firebase Real-time Menu Loader -->
     <script type="module" src="js/menu-loader.js"></script>
