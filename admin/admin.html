@@ -6,6 +6,7 @@
     <title>WHT D FORK - Admin Panel</title>
     <link rel="stylesheet" href="../css/admin.css">
     <link rel="stylesheet" href="../css/moments.css">
+    <script src="../site-config.js"></script>
 </head>
 <body>
     <div id="adminLoader" class="admin-loader hidden" aria-live="polite" aria-busy="false">
@@ -23,10 +24,13 @@
             </div>
             
             <nav class="nav-menu">
+                <button class="nav-item active" data-tab="admin-home">
+                    <span class="icon">🏠</span> Dashboard
+                </button>
                 <button class="nav-item" data-tab="menu-images">
                     <span class="icon">🖼️</span> Menu Images
                 </button>
-                <button class="nav-item active" data-tab="today-offer">
+                <button class="nav-item" data-tab="today-offer">
                     <span class="icon">🔥</span> Today's Offer
                 </button>
                 <button class="nav-item" data-tab="restaurant-info">
@@ -60,7 +64,7 @@
         <!-- Main Content Area -->
         <main class="main-content">
             <header class="top-header">
-                <h1 id="pageTitle">Today's Offer</h1>
+                <h1 id="pageTitle">Dashboard</h1>
             </header>
 
             <div class="content-body">
@@ -82,25 +86,102 @@
                     </div>
                 </section>
 
-                <!-- Tab 2: Today's Offer (Default Selected) -->
-                <section id="tab-today-offer" class="tab-content active">
+                <!-- Tab 2: Admin Dashboard -->
+                <section id="tab-admin-home" class="tab-content active">
                     <div class="section-intro">
-                        <h3>Today's Offer</h3>
-                        <p>Special banner updates for daily deals.</p>
+                        <h3>Admin Dashboard</h3>
+                        <p>Snapshot of your digital menu, active moments, and today's offer.</p>
                     </div>
-                    <div class="placeholder-box">
-                        <p class="muted">Coming soon in Part 7.</p>
+
+                    <div class="dashboard-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:20px;">
+                        <div class="dashboard-card" style="background:#ffffff;border:1px solid #e2e8f0;border-radius:14px;padding:20px;box-shadow:0 10px 24px rgba(15,23,42,.06);">
+                            <p style="margin:0 0 8px;color:#64748b;font-size:.95rem;font-weight:600;">Menu Pages</p>
+                            <h2 id="dashboardMenuPagesCount" style="margin:0;font-size:2rem;color:#7c3aed;">0</h2>
+                            <small style="color:#475569;">Total dynamic menu cards published</small>
+                        </div>
+                        <div class="dashboard-card" style="background:#ffffff;border:1px solid #e2e8f0;border-radius:14px;padding:20px;box-shadow:0 10px 24px rgba(15,23,42,.06);">
+                            <p style="margin:0 0 8px;color:#64748b;font-size:.95rem;font-weight:600;">Active Moments</p>
+                            <h2 id="dashboardActiveMomentsCount" style="margin:0;font-size:2rem;color:#ef4444;">0</h2>
+                            <small style="color:#475569;">Active moment overlays</small>
+                        </div>
+                        <div class="dashboard-card" style="background:#ffffff;border:1px solid #e2e8f0;border-radius:14px;padding:20px;box-shadow:0 10px 24px rgba(15,23,42,.06);">
+                            <p style="margin:0 0 8px;color:#64748b;font-size:.95rem;font-weight:600;">Current Offer</p>
+                            <p id="dashboardOfferText" style="margin:0;color:#0f172a;line-height:1.5;min-height:56px;">No offer set yet.</p>
+                        </div>
+                        <div class="dashboard-card" style="background:#ffffff;border:1px solid #e2e8f0;border-radius:14px;padding:20px;box-shadow:0 10px 24px rgba(15,23,42,.06);">
+                            <p style="margin:0 0 8px;color:#64748b;font-size:.95rem;font-weight:600;">Last Updated</p>
+                            <p id="dashboardLastUpdated" style="margin:0;color:#0f172a;line-height:1.5;">Not available</p>
+                        </div>
                     </div>
                 </section>
 
-                <!-- Tab 3: Restaurant Info -->
+                <!-- Tab 3: Today's Offer -->
+                <section id="tab-today-offer" class="tab-content">
+                    <div class="section-intro">
+                        <h3>Today's Offer</h3>
+                        <p>Update the announcement that appears on the homepage and menu landing pages.</p>
+                    </div>
+                    <div style="background: #ffffff; padding: 20px; border-radius: 12px; border: 1px solid #e0e0e0;">
+                        <div style="display:grid;gap:16px;">
+                            <div>
+                                <label style="font-weight:600; display:block; margin-bottom:6px;">Today’s offer message</label>
+                                <textarea id="todayOfferAnnouncementInput" rows="4" placeholder="Enter the banner text for today's offer" style="width:100%;padding:12px;border-radius:10px;border:1px solid #cbd5e1;font-size:0.95rem;"></textarea>
+                            </div>
+                            <div style="display:flex;justify-content:flex-end;">
+                                <button id="saveTodayOfferBtn" type="button" style="background:#2563eb;color:#ffffff;border:none;padding:12px 22px;border-radius:10px;cursor:pointer;font-weight:700;">Save Today's Offer</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Tab 4: Restaurant Info -->
                 <section id="tab-restaurant-info" class="tab-content">
                     <div class="section-intro">
                         <h3>Restaurant Info</h3>
-                        <p>Address, phone numbers, and social media handles.</p>
+                        <p>Update address, contact details, map link, and social profiles for the home page.</p>
                     </div>
-                    <div class="placeholder-box">
-                        <p class="muted">Coming soon in Part 6.</p>
+                    <div style="background: #ffffff; padding: 20px; border-radius: 12px; border: 1px solid #e0e0e0; display:grid;gap:18px;">
+                        <div>
+                            <label style="font-weight:600; display:block; margin-bottom:6px;">Address</label>
+                            <textarea id="siteAddressInput" rows="3" style="width:100%;padding:12px;border-radius:10px;border:1px solid #cbd5e1;font-size:0.95rem;"></textarea>
+                        </div>
+                        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;">
+                            <div>
+                                <label style="font-weight:600; display:block; margin-bottom:6px;">Phone</label>
+                                <input id="sitePhoneInput" type="text" placeholder="+91 96435 38871" style="width:100%;padding:12px;border-radius:10px;border:1px solid #cbd5e1;font-size:0.95rem;" />
+                            </div>
+                            <div>
+                                <label style="font-weight:600; display:block; margin-bottom:6px;">Email</label>
+                                <input id="siteEmailInput" type="email" placeholder="whtdfork@gmail.com" style="width:100%;padding:12px;border-radius:10px;border:1px solid #cbd5e1;font-size:0.95rem;" />
+                            </div>
+                        </div>
+                        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;">
+                            <div>
+                                <label style="font-weight:600; display:block; margin-bottom:6px;">WhatsApp Number</label>
+                                <input id="siteWhatsappInput" type="text" placeholder="919643538871" style="width:100%;padding:12px;border-radius:10px;border:1px solid #cbd5e1;font-size:0.95rem;" />
+                            </div>
+                            <div>
+                                <label style="font-weight:600; display:block; margin-bottom:6px;">Map URL</label>
+                                <input id="siteMapUrlInput" type="url" placeholder="https://maps.app.goo.gl/..." style="width:100%;padding:12px;border-radius:10px;border:1px solid #cbd5e1;font-size:0.95rem;" />
+                            </div>
+                        </div>
+                        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;">
+                            <div>
+                                <label style="font-weight:600; display:block; margin-bottom:6px;">Instagram URL</label>
+                                <input id="siteInstagramInput" type="url" placeholder="https://instagram.com/..." style="width:100%;padding:12px;border-radius:10px;border:1px solid #cbd5e1;font-size:0.95rem;" />
+                            </div>
+                            <div>
+                                <label style="font-weight:600; display:block; margin-bottom:6px;">Facebook URL</label>
+                                <input id="siteFacebookInput" type="url" placeholder="https://facebook.com/..." style="width:100%;padding:12px;border-radius:10px;border:1px solid #cbd5e1;font-size:0.95rem;" />
+                            </div>
+                        </div>
+                        <div>
+                            <label style="font-weight:600; display:block; margin-bottom:6px;">YouTube URL</label>
+                            <input id="siteYoutubeInput" type="url" placeholder="https://youtube.com/..." style="width:100%;padding:12px;border-radius:10px;border:1px solid #cbd5e1;font-size:0.95rem;" />
+                        </div>
+                        <div style="display:flex;justify-content:flex-end;">
+                            <button id="saveRestaurantInfoBtn" type="button" style="background:#16a34a;color:#ffffff;border:none;padding:12px 22px;border-radius:10px;cursor:pointer;font-weight:700;">Save Restaurant Info</button>
+                        </div>
                     </div>
                 </section>
 
