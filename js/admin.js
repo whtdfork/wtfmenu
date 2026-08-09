@@ -12,6 +12,18 @@ import { initMomentsMediaPicker } from "./components/moments-media-picker.js";
 // Correct path to your moments management file containing the save/preview/deactivate listeners
 import "./moments.js";
 
+function setAdminLoader(show, message = "Loading...") {
+    const loader = document.getElementById("adminLoader");
+    const text = document.getElementById("adminLoaderText");
+    if (!loader) return;
+    if (text) text.textContent = message;
+    loader.classList.toggle("hidden", !show);
+    loader.setAttribute("aria-busy", show ? "true" : "false");
+}
+
+window.showAdminLoader = (message = "Loading...") => setAdminLoader(true, message);
+window.hideAdminLoader = () => setAdminLoader(false);
+
 async function loadExistingImages() {}
 async function loadMoments() {}
 

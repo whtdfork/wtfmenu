@@ -45,10 +45,15 @@ function listenForMenuUpdates() {
 
             console.log(`// Rendering ${activePages.length} pages instantly to DOM.`);
 
-            // Clear loading box if present
+            // Clear loading box if present and hide the full-page loader
             const loadingBox = document.getElementById("menuLoading");
             if (loadingBox) {
                 loadingBox.remove();
+            }
+
+            const pageLoader = document.getElementById("pageLoader");
+            if (pageLoader) {
+                pageLoader.classList.add("hidden");
             }
 
             // Clean existing missing images
@@ -87,10 +92,20 @@ function listenForMenuUpdates() {
         } else {
             menuContainer.innerHTML = `<p style="text-align: center; padding: 40px; color: #888;">Menu content is currently updating.</p>`;
             renderedPageIds = "";
+
+            const pageLoader = document.getElementById("pageLoader");
+            if (pageLoader) {
+                pageLoader.classList.add("hidden");
+            }
         }
     }, (error) => {
         console.error("// Error fetching live menu updates:", error);
         menuContainer.innerHTML = `<p style="text-align: center; padding: 40px; color: #dc3545;">Failed to load live menu. Please try again.</p>`;
+
+        const pageLoader = document.getElementById("pageLoader");
+        if (pageLoader) {
+            pageLoader.classList.add("hidden");
+        }
     });
 }
 

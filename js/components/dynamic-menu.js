@@ -26,6 +26,7 @@ async function safeDeleteStorageFile(storagePath) {
 
 async function savePagesToFirestore() {
     try {
+        window.showAdminLoader("Saving menu pages...");
         const menuDocRef = doc(db, "menu", "dynamic_cards");
         const pagesToSave = autoIndexPages(menuPages).map(page => ({
             id: page.id,
@@ -40,6 +41,8 @@ async function savePagesToFirestore() {
         console.log(`// Dynamic menu saved with ${pagesToSave.length} pages.`);
     } catch (error) {
         console.error("// Error saving dynamic menu to Firestore:", error);
+    } finally {
+        window.hideAdminLoader();
     }
 }
 

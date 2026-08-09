@@ -7,6 +7,7 @@ export async function loadFirebaseFiles() {
     const grid = document.getElementById("firebaseFilesGrid");
     if (!grid) return;
     
+    window.showAdminLoader("Loading Firebase files...");
     grid.innerHTML = '<p class="muted">Loading files...</p>';
     
     try {
@@ -35,6 +36,8 @@ export async function loadFirebaseFiles() {
     } catch (error) {
         console.error("// Error loading Firebase files:", error);
         grid.innerHTML = `<p style="color: red;">Error loading files: ${error.message}</p>`;
+    } finally {
+        window.hideAdminLoader();
     }
 }
 
@@ -59,6 +62,7 @@ export async function getFirebaseFilesList() {
 window.deleteFirebaseFile = async function(storagePath) {
     if (!confirm("Are you sure you want to delete this file? This cannot be undone.")) return;
     
+    window.showAdminLoader("Deleting file...");
     try {
         const fileRef = ref(storage, storagePath);
         await deleteObject(fileRef);
@@ -67,6 +71,8 @@ window.deleteFirebaseFile = async function(storagePath) {
     } catch (error) {
         console.error("// Error deleting file:", error);
         alert("Failed to delete file: " + error.message);
+    } finally {
+        window.hideAdminLoader();
     }
 };
 
@@ -93,6 +99,7 @@ export function initFirebaseFileUpload() {
         }
         
         try {
+            window.showAdminLoader("Uploading file...");
             await uploadBytes(storageRef, file);
             if (statusDiv) {
                 statusDiv.textContent = "Upload successful!";
@@ -106,6 +113,8 @@ export function initFirebaseFileUpload() {
                 statusDiv.textContent = "Upload failed: " + error.message;
                 statusDiv.style.color = "#dc3545";
             }
+        } finally {
+            window.hideAdminLoader();
         }
         
         setTimeout(() => {

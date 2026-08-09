@@ -25,6 +25,7 @@ window.syncMomentAdminUI = async function() {
 
     if (!toggleBtn) return;
 
+    window.showAdminLoader("Syncing Moments settings...");
     try {
         console.log("// Moments: Syncing Admin UI state with Firestore...");
         const momentsRef = collection(db, "moments");
@@ -41,6 +42,8 @@ window.syncMomentAdminUI = async function() {
         }
     } catch (e) {
         console.error("// Moments Error: Failed to sync Admin UI state", e);
+    } finally {
+        window.hideAdminLoader();
     }
 
     if (document.getElementById("momentPageSelectionContainer")) {
@@ -179,6 +182,7 @@ window.toggleMomentStatus = async function() {
         return;
     }
 
+    window.showAdminLoader("Updating Moments status...");
     toggleBtn.disabled = true;
 
     const isCurrentlyActive = toggleBtn.innerText.trim() === "Deactivate";
@@ -207,6 +211,7 @@ window.toggleMomentStatus = async function() {
         console.error("// Moments Error: Failed to update Firestore status", e);
     } finally {
         toggleBtn.disabled = false;
+        window.hideAdminLoader();
     }
 };
 
@@ -396,6 +401,7 @@ window.saveMomentConfig = async function() {
     if (saveBtn) {
         setButtonLoading(saveBtn, "Saving...");
     }
+    window.showAdminLoader("Saving Moments configuration...");
 
     try {
         console.log("// Moments: Saving moment configuration...");
@@ -423,6 +429,7 @@ window.saveMomentConfig = async function() {
         if (saveBtn) {
             clearButtonLoading(saveBtn);
         }
+        window.hideAdminLoader();
     }
 };
 

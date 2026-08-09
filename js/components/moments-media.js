@@ -5,6 +5,7 @@ export async function loadMomentsMedia() {
     const grid = document.getElementById("momentsMediaGrid");
     if (!grid) return;
 
+    window.showAdminLoader("Loading moments media...");
     grid.innerHTML = '<p class="muted">Loading moments media library...</p>';
 
     try {
@@ -33,12 +34,15 @@ export async function loadMomentsMedia() {
     } catch (error) {
         console.error("// Error loading moments media:", error);
         grid.innerHTML = `<p style="color: red;">Error loading moments media: ${error.message}</p>`;
+    } finally {
+        window.hideAdminLoader();
     }
 }
 
 window.deleteMomentsMediaFile = async function(storagePath) {
     if (!confirm("Delete this moments media file?")) return;
 
+    window.showAdminLoader("Deleting media file...");
     try {
         const fileRef = ref(storage, storagePath);
         await deleteObject(fileRef);
@@ -47,6 +51,8 @@ window.deleteMomentsMediaFile = async function(storagePath) {
     } catch (error) {
         console.error("// Error deleting moments file:", error);
         alert("Failed to delete file: " + error.message);
+    } finally {
+        window.hideAdminLoader();
     }
 };
 
@@ -73,6 +79,7 @@ export function initMomentsMediaUpload() {
         }
 
         try {
+            window.showAdminLoader("Uploading moments media...");
             await uploadBytes(storageRef, file);
             if (statusDiv) {
                 statusDiv.textContent = "Upload successful!";
@@ -87,6 +94,8 @@ export function initMomentsMediaUpload() {
                 statusDiv.style.color = "#dc3545";
             }
             alert("Moments file upload failed: " + (error.message || error.code || "Check console for details."));
+        } finally {
+            window.hideAdminLoader();
         }
     });
 }

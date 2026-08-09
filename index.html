@@ -100,6 +100,12 @@
 
     </aside>
 
+    <!-- Page Loader Animation -->
+    <div id="pageLoader" class="page-loader">
+        <img src="media/animation/whtdfork_loading.svg" alt="Loading animation" />
+        <p>Preparing your menu...</p>
+    </div>
+
     <!-- Page Header -->
     <header class="header">
 
@@ -149,6 +155,7 @@
              src="images/menu/7_thank_you.JPG"
              alt="Thank You">
 
+    </main>
 
     <script>
 
@@ -202,7 +209,15 @@
 
     </script>
 
-    <!-- Dynamic Firebase Real-time Menu Loader -->
+    <!-- Hide page loader once the static page has finished loading -->
+    <script>
+        window.addEventListener("load", () => {
+            const pageLoader = document.getElementById("pageLoader");
+            if (pageLoader) {
+                pageLoader.classList.add("hidden");
+            }
+        });
+    </script>
     <script type="module" src="js/moments.js"></script>
 
 </body>
