@@ -322,10 +322,17 @@ const MomentsEngine = {
 
 // Bind admin action button event listeners safely
 document.addEventListener("DOMContentLoaded", () => {
-    const momentsContainer = document.getElementById("momentsContainer");
-    if (momentsContainer) {
-        MomentsEngine.renderActiveMoment(momentsContainer);
-    }
+// Run on customer menu page
+const menuContainer = document.getElementById("dynamicMenuContainer");
+if (menuContainer) {
+    MomentsEngine.renderActiveMoment(menuContainer);
+}
+
+// Run on admin preview page
+const momentsContainer = document.getElementById("momentsContainer");
+if (momentsContainer) {
+    MomentsEngine.renderActiveMoment(momentsContainer);
+}
 
     if (document.getElementById("toggleMomentBtn")) {
         window.syncMomentAdminUI();

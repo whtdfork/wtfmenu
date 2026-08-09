@@ -14,6 +14,7 @@
       gtag('config', 'G-BHCMWL56VN');
     </script>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="css/moments.css">
     <script src="site-config.js" defer></script>
 </head>
 <body>
@@ -116,37 +117,12 @@
 
     </header>
 
-    <!-- Digital Menu -->
-    <main class="menu-container">
-
-        <img class="menu-image"
-             src="images/menu/1_cover.JPG"
-             alt="Wht D Fork Cover">
-
-        <img class="menu-image"
-             src="images/menu/2_pizza_menu.JPG"
-             alt="Pizza Menu">
-
-        <img class="menu-image"
-             src="images/menu/3_momos.JPG"
-             alt="Momos">
-
-        <img class="menu-image"
-             src="images/menu/4_drinks.JPG"
-             alt="Drinks and other items">
-
-        <img class="menu-image"
-             src="images/menu/5_desserts.JPG"
-             alt="Desserts">
-
-        <img class="menu-image"
-             src="images/menu/6_garlic_bread.JPG"
-             alt="Garlic Bread">
-
-        <img class="menu-image"
-             src="images/menu/7_thank_you.JPG"
-             alt="Thank You">
-
+    <!-- Dynamic Digital Menu Container -->
+    <main class="menu-container" id="dynamicMenuContainer">
+        <!-- Live Firebase images load dynamically here -->
+        <div id="menuLoading" style="text-align: center; padding: 40px; color: #666;">
+            <p>Loading digital menu...</p>
+        </div>
     </main>
 
     <script>
@@ -200,6 +176,10 @@
         });
 
     </script>
+
+    <!-- Dynamic Firebase Real-time Menu Loader -->
+    <script type="module" src="js/menu-loader.js"></script>
+    <script type="module" src="js/moments.js"></script>
 
 </body>
 </html>
