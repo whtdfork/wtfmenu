@@ -21,7 +21,7 @@ onAuthStateChanged(auth, (user) => {
     if (user) {
         // Log user info when authenticated
         console.log("User already logged in:", user.email);
-        window.location.href = "../admin/index.html";
+        window.location.href = "../admin/admin.html";
     }
 });
 
