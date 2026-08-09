@@ -1,5 +1,5 @@
 import { auth, db, storage } from "../firebase-config.js";
-import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
 const MAX_PAGES = 10;
@@ -24,19 +24,52 @@ async function safeDeleteStorageFile(storagePath) {
     }
 }
 
+async function savePagesToFirestore() {
+    try {
+        const menuDocRef = doc(db, "menu", "dynamic_cards");
+        const pagesToSave = autoIndexPages(menuPages).map(page => ({
+            id: page.id,
+            order: page.order,
+            url: page.url || "",
+            storagePath: page.storagePath || "",
+            uploadedBy: page.uploadedBy || "",
+            uploadedAt: page.uploadedAt || ""
+        }));
+
+        await setDoc(menuDocRef, { pages: pagesToSave }, { merge: true });
+        console.log(`// Dynamic menu saved with ${pagesToSave.length} pages.`);
+    } catch (error) {
+        console.error("// Error saving dynamic menu to Firestore:", error);
+    }
+}
+
+window.savePagesToFirestore = savePagesToFirestore;
+
 export async function loadDynamicMenu() {
     try {
         const menuDocRef = doc(db, "menu", "dynamic_cards");
         const docSnap = await getDoc(menuDocRef);
 
-        if (docSnap.exists() && docSnap.data().pages) {
-            menuPages = autoIndexPages(docSnap.data().pages);
+        if (docSnap.exists() && Array.isArray(docSnap.data().pages) && docSnap.data().pages.length > 0) {
+            const rawPages = docSnap.data().pages;
+            const normalizedPages = rawPages.map((page) => ({
+                id: page.id || `page_${Date.now()}`,
+                order: typeof page.order === "number" ? page.order : 0,
+                url: page.url || "",
+                storagePath: page.storagePath || "",
+                uploadedBy: page.uploadedBy || "",
+                uploadedAt: page.uploadedAt || ""
+            }));
+
+            normalizedPages.sort((a, b) => a.order - b.order);
+            menuPages = autoIndexPages(normalizedPages);
             console.log(`// Dynamic menu loaded with ${menuPages.length} pages.`);
         } else {
             menuPages = [
                 { id: "page_1", order: 0, url: "", storagePath: "", uploadedBy: "", uploadedAt: "" }
             ];
             console.log("// No dynamic cards document found in Firestore. Created default cover card.");
+            await savePagesToFirestore();
         }
 
         renderMenuGrid();
@@ -177,32 +210,40 @@ window.uploadPageImage = async function(pageId) {
     if (statusMsg) statusMsg.textContent = "Uploading...";
 
     const page = menuPages.find(p => p.id === pageId);
-    if (page && page.storagePath) {
+    if (!page) {
+        console.error("// Error: page not found for upload", pageId);
+        if (statusMsg) statusMsg.textContent = "Upload failed.";
+        if (saveBtn) saveBtn.disabled = false;
+        return;
+    }
+
+    if (page.storagePath) {
         await safeDeleteStorageFile(page.storagePath);
     }
 
     const timestamp = Date.now();
-    const storagePath = `menu/${pageId}_${timestamp}_${file.name}`;
+    const extension = file.name.split('.').pop().toLowerCase() || 'img';
+    const storagePath = `menu/${pageId}_${timestamp}.${extension}`;
     const storageRef = ref(storage, storagePath);
 
     try {
         const snapshot = await uploadBytes(storageRef, file);
         const downloadURL = await getDownloadURL(snapshot.ref);
 
-        if (page) {
-            page.url = downloadURL;
-            page.uploadedBy = user.email;
-            page.uploadedAt = new Date().toLocaleString();
-            page.storagePath = storagePath;
-        }
+        page.url = downloadURL;
+        page.uploadedBy = user.email;
+        page.uploadedAt = new Date().toLocaleString();
+        page.storagePath = storagePath;
 
-        if (typeof window.savePagesToFirestore === "function") {
-            await window.savePagesToFirestore();
-        }
+        await savePagesToFirestore();
+
         if (statusMsg) statusMsg.textContent = "Saved successfully!";
+        selectedFiles[pageId] = null;
         renderMenuGrid();
     } catch (error) {
         console.error("// Error uploading image:", error);
         if (statusMsg) statusMsg.textContent = "Upload failed.";
+    } finally {
+        if (saveBtn) saveBtn.disabled = false;
     }
 };
