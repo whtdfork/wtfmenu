@@ -2,6 +2,8 @@
 import { db } from "./firebase-config.js";
 import { collection, query, where, getDocs, limit, doc, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+console.log("// Moments module loaded: js/moments.js executed.");
+
 // Helper to dynamically load Lottie Web player if needed
 function loadLottieScript() {
     return new Promise((resolve) => {
@@ -238,24 +240,44 @@ const MomentsEngine = {
 
         document.body.appendChild(overlay);
         console.log("// MomentsEngine: Overlay appended to DOM successfully.");
+        console.log("// MomentsEngine: Active moment loaded", {
+            id: activeMoment.id,
+            title: activeMoment.title,
+            lottieUrl: activeMoment.lottieUrl,
+            imageUrl: activeMoment.imageUrl,
+            audioUrl: activeMoment.audioUrl,
+            duration: activeMoment.duration
+        });
 
         // Attempt Audio Playback with Autoplay Fallback handling
         if (activeMoment.audioUrl) {
             const audioEl = overlay.querySelector("#momentAudio");
             if (audioEl) {
+                audioEl.addEventListener('canplaythrough', () => {
+                    console.log("// MomentsEngine: Audio file loaded and can play through.");
+                });
+                audioEl.addEventListener('error', (event) => {
+                    console.error("// MomentsEngine Error: Audio failed to load.", event);
+                });
                 audioEl.play().then(() => {
                     console.log("// MomentsEngine: Audio playing successfully.");
                 }).catch((error) => {
                     console.warn("// MomentsEngine Warning: Autoplay blocked by browser. Audio will play on first click/tap.", error);
                     const playOnUserInteraction = () => {
-                        audioEl.play().catch(e => console.error("// MomentsEngine Error: Manual play failed", e));
+                        audioEl.play().then(() => {
+                            console.log("// MomentsEngine: Audio playback succeeded after user interaction.");
+                        }).catch(e => console.error("// MomentsEngine Error: Manual play failed", e));
                         document.removeEventListener("click", playOnUserInteraction);
                         document.removeEventListener("touchstart", playOnUserInteraction);
                     };
                     document.addEventListener("click", playOnUserInteraction);
                     document.addEventListener("touchstart", playOnUserInteraction);
                 });
+            } else {
+                console.warn("// MomentsEngine Warning: activeMoment.audioUrl is set but audio element was not created.");
             }
+        } else {
+            console.log("// MomentsEngine: No audioUrl configured for active moment.");
         }
 
         // Initialize Animation (Supports both Lottie JSON and direct image/SVG animations)
@@ -263,26 +285,60 @@ const MomentsEngine = {
             const lottieContainer = overlay.querySelector("#lottieContainer");
             if (lottieContainer) {
                 const isJsonUrl = activeMoment.lottieUrl.toLowerCase().includes(".json");
+                console.log("// MomentsEngine: Animation URL detected", { url: activeMoment.lottieUrl, isJsonUrl });
                 
                 if (isJsonUrl) {
                     console.log("// MomentsEngine: Loading Lottie JSON animation from URL");
                     await loadLottieScript();
                     if (window.lottie) {
-                        window.lottie.loadAnimation({
+                        const animationInstance = window.lottie.loadAnimation({
                             container: lottieContainer,
                             renderer: "svg",
                             loop: true,
                             autoplay: true,
                             path: activeMoment.lottieUrl
                         });
+                        animationInstance.addEventListener("DOMLoaded", () => {
+                            console.log("// MomentsEngine: Lottie animation DOM loaded successfully.");
+                        });
+                        animationInstance.addEventListener("data_ready", () => {
+                            console.log("// MomentsEngine: Lottie animation data loaded and ready.");
+                        });
+                        animationInstance.addEventListener("complete", () => {
+                            console.log("// MomentsEngine: Lottie animation completed.");
+                        });
                     } else {
                         console.error("// MomentsEngine Error: Lottie library failed to load");
                     }
                 } else {
                     console.log("// MomentsEngine: Loading graphic animation asset (SVG/GIF/Image)");
-                    lottieContainer.innerHTML = `<img src="${activeMoment.lottieUrl}" style="max-width: 100%; max-height: 150px; object-fit: contain;" alt="Animation Asset" />`;
+                    lottieContainer.style.display = 'flex';
+                    lottieContainer.style.justifyContent = 'center';
+                    lottieContainer.style.alignItems = 'center';
+                    lottieContainer.style.width = '220px';
+                    lottieContainer.style.height = '220px';
+
+                    const imgEl = document.createElement('img');
+                    imgEl.src = activeMoment.lottieUrl;
+                    imgEl.alt = 'Animation Asset';
+                    imgEl.style.width = '100%';
+                    imgEl.style.height = '100%';
+                    imgEl.style.objectFit = 'contain';
+                    imgEl.style.display = 'block';
+                    imgEl.addEventListener('load', () => {
+                        console.log("// MomentsEngine: Graphic animation asset loaded successfully.");
+                    });
+                    imgEl.addEventListener('error', (event) => {
+                        console.error("// MomentsEngine Error: Graphic animation asset failed to load.", event);
+                    });
+                    lottieContainer.innerHTML = '';
+                    lottieContainer.appendChild(imgEl);
                 }
+            } else {
+                console.warn("// MomentsEngine Warning: Lottie container not found.");
             }
+        } else {
+            console.log("// MomentsEngine: No animation URL provided.");
         }
 
         let transitionDismissed = false;
@@ -322,17 +378,22 @@ const MomentsEngine = {
 
 // Bind admin action button event listeners safely
 document.addEventListener("DOMContentLoaded", () => {
-// Run on customer menu page
-const menuContainer = document.getElementById("dynamicMenuContainer");
-if (menuContainer) {
-    MomentsEngine.renderActiveMoment(menuContainer);
-}
+    console.log("// Moments DOMContentLoaded fired: moments page script active.");
+    // Run on customer menu page
+    const menuContainer = document.getElementById("dynamicMenuContainer");
+    if (menuContainer) {
+        MomentsEngine.renderActiveMoment(menuContainer);
+    } else {
+        console.log("// Moments: Menu container not found on this page.");
+    }
 
-// Run on admin preview page
-const momentsContainer = document.getElementById("momentsContainer");
-if (momentsContainer) {
-    MomentsEngine.renderActiveMoment(momentsContainer);
-}
+    // Run on admin preview page
+    const momentsContainer = document.getElementById("momentsContainer");
+    if (momentsContainer) {
+        MomentsEngine.renderActiveMoment(momentsContainer);
+    } else {
+        console.log("// Moments: Admin preview container not found on this page.");
+    }
 
     if (document.getElementById("toggleMomentBtn")) {
         window.syncMomentAdminUI();
