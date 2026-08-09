@@ -35,6 +35,7 @@ window.syncMomentAdminUI = async function() {
             const isActive = docData.isActive === true;
             updateAdminUIState(isActive, toggleBtn, badge);
             populateAdminForm(docData);
+            lastSavedMomentConfig = docData;
         } else {
             updateAdminUIState(true, toggleBtn, badge);
         }
@@ -234,10 +235,167 @@ function getAdminFormValues(isActiveState) {
     };
 }
 
+let lastSavedMomentConfig = null;
+
+function setButtonLoading(button, loadingText) {
+    if (!button) return;
+    if (!button.dataset.originalText) {
+        button.dataset.originalText = button.textContent;
+    }
+    button.textContent = loadingText;
+    button.disabled = true;
+    button.classList.add("loading-btn");
+}
+
+function clearButtonLoading(button) {
+    if (!button) return;
+    if (button.dataset.originalText) {
+        button.textContent = button.dataset.originalText;
+    }
+    button.disabled = false;
+    button.classList.remove("loading-btn");
+}
+
+function renderMomentOverlay(activeMoment) {
+    if (!activeMoment) return;
+
+    const existingOverlay = document.getElementById("momentOverlay");
+    if (existingOverlay) {
+        existingOverlay.remove();
+    }
+
+    const overlay = document.createElement("div");
+    overlay.id = "momentOverlay";
+    overlay.className = `moment-overlay theme-${activeMoment.theme || 'welcome'}`;
+    overlay.style.zIndex = "9999";
+
+    let audioElementHtml = "";
+    if (activeMoment.audioUrl) {
+        audioElementHtml = `<audio id="momentAudio" src="${activeMoment.audioUrl}" preload="auto"></audio>`;
+    }
+
+    let mediaImageHtml = "";
+    if (activeMoment.imageUrl) {
+        mediaImageHtml = `<img src="${activeMoment.imageUrl}" class="moment-banner-img" alt="Occasion Banner" />`;
+    }
+
+    overlay.innerHTML = `
+        ${audioElementHtml}
+        <div class="moment-content-card">
+            <div id="lottieContainer" class="lottie-container"></div>
+            ${mediaImageHtml}
+            <h1 class="moment-title">${activeMoment.title || ''}</h1>
+            <p class="moment-subtitle">${(activeMoment.subtitle || '').replace(/\n/g, '<br>')}</p>
+            <button class="moment-skip-btn" id="skipMomentBtn" type="button">${activeMoment.buttonText || 'View Menu'}</button>
+        </div>
+    `;
+
+    document.body.appendChild(overlay);
+
+    if (activeMoment.audioUrl) {
+        const audioEl = overlay.querySelector("#momentAudio");
+        if (audioEl) {
+            audioEl.addEventListener('error', (event) => {
+                console.error("// MomentsEngine Error: Audio failed to load.", event);
+            });
+            audioEl.play().catch(() => {
+                const playOnUserInteraction = () => {
+                    audioEl.play().catch((e) => console.error("// MomentsEngine Error: Manual play failed", e));
+                    document.removeEventListener("click", playOnUserInteraction);
+                    document.removeEventListener("touchstart", playOnUserInteraction);
+                };
+                document.addEventListener("click", playOnUserInteraction);
+                document.addEventListener("touchstart", playOnUserInteraction);
+            });
+        }
+    }
+
+    if (activeMoment.lottieUrl) {
+        const lottieContainer = overlay.querySelector("#lottieContainer");
+        if (lottieContainer) {
+            const isJsonUrl = activeMoment.lottieUrl.toLowerCase().includes(".json");
+            if (isJsonUrl) {
+                loadLottieScript().then(() => {
+                    if (window.lottie) {
+                        window.lottie.loadAnimation({
+                            container: lottieContainer,
+                            renderer: "svg",
+                            loop: true,
+                            autoplay: true,
+                            path: activeMoment.lottieUrl
+                        });
+                    }
+                }).catch((error) => {
+                    console.error("// MomentsEngine Error: Failed to load Lottie library.", error);
+                });
+            } else {
+                const imgEl = document.createElement('img');
+                imgEl.src = activeMoment.lottieUrl;
+                imgEl.alt = 'Animation Asset';
+                imgEl.style.width = '100%';
+                imgEl.style.height = '100%';
+                imgEl.style.objectFit = 'contain';
+                imgEl.style.display = 'block';
+                lottieContainer.appendChild(imgEl);
+            }
+        }
+    }
+
+    const dismissOverlay = () => {
+        overlay.classList.add("fade-out");
+        const audioEl = overlay.querySelector("#momentAudio");
+        if (audioEl) {
+            audioEl.pause();
+            audioEl.currentTime = 0;
+        }
+        setTimeout(() => {
+            if (overlay && overlay.parentNode) {
+                overlay.remove();
+            }
+        }, 500);
+    };
+
+    const timer = setTimeout(dismissOverlay, activeMoment.duration || 4000);
+    const skipBtn = overlay.querySelector("#skipMomentBtn");
+    if (skipBtn) {
+        skipBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            clearTimeout(timer);
+            dismissOverlay();
+        });
+    }
+
+    return overlay;
+}
+
+window.previewMoment = async function() {
+    const previewBtn = document.getElementById("previewMomentBtn");
+    if (!lastSavedMomentConfig) {
+        alert("Please save your moment configuration first before previewing.");
+        return;
+    }
+
+    setButtonLoading(previewBtn, "Loading preview...");
+
+    try {
+        const momentData = getAdminFormValues(true);
+        momentData.isActive = true;
+        renderMomentOverlay(momentData);
+    } catch (e) {
+        console.error("// Moments Preview Error:", e);
+        alert("Preview failed. Please check your configuration and try again.");
+    } finally {
+        clearButtonLoading(previewBtn);
+    }
+}
+
 // Save Moment configurations from Admin form
 window.saveMomentConfig = async function() {
     const saveBtn = document.getElementById("saveMomentConfigBtn");
-    if (saveBtn) saveBtn.disabled = true;
+    if (saveBtn) {
+        setButtonLoading(saveBtn, "Saving...");
+    }
 
     try {
         console.log("// Moments: Saving moment configuration...");
@@ -256,12 +414,15 @@ window.saveMomentConfig = async function() {
             const defaultDocRef = doc(momentsRef, "everyday-welcome");
             await setDoc(defaultDocRef, { momentId: "everyday-welcome", ...momentData });
         }
+        lastSavedMomentConfig = momentData;
         alert("Moment configuration saved successfully!");
     } catch (e) {
         console.error("// Moments Error: Failed to save configuration", e);
         alert("Failed to save configuration.");
     } finally {
-        if (saveBtn) saveBtn.disabled = false;
+        if (saveBtn) {
+            clearButtonLoading(saveBtn);
+        }
     }
 };
 
@@ -503,6 +664,12 @@ document.addEventListener("DOMContentLoaded", () => {
     if (saveBtn && !saveBtn.hasAttribute("data-bound")) {
         saveBtn.setAttribute("data-bound", "true");
         saveBtn.addEventListener("click", window.saveMomentConfig);
+    }
+
+    const previewBtn = document.getElementById("previewMomentBtn");
+    if (previewBtn && !previewBtn.hasAttribute("data-bound")) {
+        previewBtn.setAttribute("data-bound", "true");
+        previewBtn.addEventListener("click", window.previewMoment);
     }
 });
 
