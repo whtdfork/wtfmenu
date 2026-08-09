@@ -217,7 +217,7 @@ const MomentsEngine = {
 
         let audioElementHtml = "";
         if (activeMoment.audioUrl) {
-            audioElementHtml = `<audio id="momentAudio" src="${activeMoment.audioUrl}" autoplay loop></audio>`;
+            audioElementHtml = `<audio id="momentAudio" src="${activeMoment.audioUrl}" preload="auto"></audio>`;
         }
 
         let mediaImageHtml = "";
@@ -238,6 +238,25 @@ const MomentsEngine = {
 
         document.body.appendChild(overlay);
         console.log("// MomentsEngine: Overlay appended to DOM successfully.");
+
+        // Attempt Audio Playback with Autoplay Fallback handling
+        if (activeMoment.audioUrl) {
+            const audioEl = overlay.querySelector("#momentAudio");
+            if (audioEl) {
+                audioEl.play().then(() => {
+                    console.log("// MomentsEngine: Audio playing successfully.");
+                }).catch((error) => {
+                    console.warn("// MomentsEngine Warning: Autoplay blocked by browser. Audio will play on first click/tap.", error);
+                    const playOnUserInteraction = () => {
+                        audioEl.play().catch(e => console.error("// MomentsEngine Error: Manual play failed", e));
+                        document.removeEventListener("click", playOnUserInteraction);
+                        document.removeEventListener("touchstart", playOnUserInteraction);
+                    };
+                    document.addEventListener("click", playOnUserInteraction);
+                    document.addEventListener("touchstart", playOnUserInteraction);
+                });
+            }
+        }
 
         // Initialize Animation (Supports both Lottie JSON and direct image/SVG animations)
         if (activeMoment.lottieUrl) {
