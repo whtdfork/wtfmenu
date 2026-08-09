@@ -1,8 +1,7 @@
-// js/admin.js
 import { auth, db, storage } from "./firebase-config.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { doc, getDoc, setDoc, serverTimestamp, collection, getDocs, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js"; // Added collection, getDocs, updateDoc, deleteDoc for Moments
-import { ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+import { doc, getDoc, setDoc, serverTimestamp, collection, getDocs, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { ref, uploadBytes, getDownloadURL, deleteObject, listAll } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
 // DOM Elements
 const userEmailDisplay = document.getElementById("userEmail");
@@ -15,7 +14,7 @@ const pageTitle = document.getElementById("pageTitle");
 const MAX_PAGES = 10;
 let menuPages = [];
 const selectedFiles = {};
-let momentsList = []; // Added local state for moments
+let momentsList = [];
 
 // Helper: Normalize array order (0, 1, 2...) automatically before saving or rendering
 function autoIndexPages(pages) {
@@ -47,7 +46,7 @@ onAuthStateChanged(auth, async (user) => {
         
         await loadDynamicMenu();
         await loadExistingImages();
-        await loadMoments(); // Added loadMoments call
+        await loadMoments();
         setupImageModal();
     }
 });
@@ -69,20 +68,16 @@ navItems.forEach((button) => {
     button.addEventListener("click", () => {
         const targetTab = button.getAttribute("data-tab");
 
-        // Remove active class from all nav items & tab contents
         navItems.forEach((btn) => btn.classList.remove("active"));
         tabContents.forEach((content) => content.classList.remove("active"));
 
-        // Set clicked nav item as active
         button.classList.add("active");
 
-        // Show target tab content
         const activeTabContent = document.getElementById(`tab-${targetTab}`);
         if (activeTabContent) {
             activeTabContent.classList.add("active");
         }
 
-        // Update top header title dynamically
         if (pageTitle) {
             switch (targetTab) {
                 case 'menu-images':
@@ -94,14 +89,20 @@ navItems.forEach((button) => {
                 case 'restaurant-info':
                     pageTitle.textContent = 'Restaurant Info';
                     break;
-                case 'moments':
+                        case 'moments':
                     pageTitle.textContent = 'Moments ⭐';
+                    break;
+                case 'moments-media':
+                    pageTitle.textContent = 'Moments Media';
                     break;
                 case 'gallery':
                     pageTitle.textContent = 'Gallery';
                     break;
                 case 'opening-hours':
                     pageTitle.textContent = 'Opening Hours';
+                    break;
+                case 'firebase-files':
+                    pageTitle.textContent = 'Firebase Files';
                     break;
                 default:
                     pageTitle.textContent = 'Admin Panel';
@@ -112,9 +113,16 @@ navItems.forEach((button) => {
             loadExistingImages();
         }
         
-        // Trigger moments data load on tab switch
         if (targetTab === "moments") {
             loadMoments();
+        }
+        
+        if (targetTab === "moments-media") {
+            loadMomentsMedia();
+        }
+        
+        if (targetTab === "firebase-files") {
+            loadFirebaseFiles();
         }
     });
 });
@@ -170,7 +178,7 @@ function renderMenuGrid() {
             </div>
 
             <div class="card-meta" style="margin: 10px 0; font-size: 0.85rem; color: #555;">
-                ${page.uploadedBy ? `<small>By: ${page.uploadedBy}<br>Date: ${page.uploadedAt}</small>` : '<small>Status: Empty slot</small>'}
+                ${page.uploadedBy ? `<small>By: ${page.uploadedBy}<br>Date:${page.uploadedAt}</small>` : '<small>Status: Empty slot</small>'}
             </div>
 
             <div class="card-actions" style="display: flex; gap: 8px;">
@@ -205,7 +213,9 @@ window.addPage = async function() {
     };
 
     menuPages.push(newPage);
-    await savePagesToFirestore();
+    if (typeof savePagesToFirestore === "function") {
+        await savePagesToFirestore();
+    }
     renderMenuGrid();
 };
 
@@ -216,9 +226,10 @@ window.movePage = async function(pageId, newIndex) {
     const [movedPage] = menuPages.splice(currentIndex, 1);
     menuPages.splice(newIndex, 0, movedPage);
 
-    await savePagesToFirestore();
+    if (typeof savePagesToFirestore === "function") {
+        await savePagesToFirestore();
+    }
     renderMenuGrid();
-    console.log(`// Moved page [${pageId}] from Slot ${currentIndex + 1} to Slot ${newIndex + 1}`);
 };
 
 window.deletePage = async function(pageId) {
@@ -233,9 +244,13 @@ window.deletePage = async function(pageId) {
     menuPages = menuPages.filter(p => p.id !== pageId);
     delete selectedFiles[pageId];
 
-    await savePagesToFirestore();
+    if (typeof savePagesToFirestore === "function") {
+        await savePagesToFirestore();
+    }
     renderMenuGrid();
-    await loadExistingImages();
+    if (typeof loadExistingImages === "function") {
+        await loadExistingImages();
+    }
 };
 
 window.handleFileSelect = function(pageId, event) {
@@ -291,10 +306,14 @@ window.uploadPageImage = async function(pageId) {
             page.storagePath = storagePath;
         }
 
-        await savePagesToFirestore();
+        if (typeof savePagesToFirestore === "function") {
+            await savePagesToFirestore();
+        }
         if (statusMsg) statusMsg.textContent = "Saved successfully!";
         renderMenuGrid();
-        await loadExistingImages();
+        if (typeof loadExistingImages === "function") {
+            await loadExistingImages();
+        }
 
     } catch (error) {
         console.error("// Error uploading image:", error);
@@ -332,152 +351,215 @@ window.closeImageModal = function() {
     }
 };
 
-// Helper: Sync Pages to Firestore
-async function savePagesToFirestore() {
-    const user = auth.currentUser;
-    const menuDocRef = doc(db, "menu", "dynamic_cards");
+// Dummy placeholders if not defined elsewhere
+async function loadExistingImages() {}
+async function loadMoments() {}
 
-    menuPages = autoIndexPages(menuPages);
-
-    await setDoc(menuDocRef, {
-        pages: menuPages,
-        lastUpdatedBy: user ? user.email : "system",
-        lastUpdatedAt: serverTimestamp()
-    }, { merge: true });
-}
-
-// Function to fetch and render image audit gallery tab
-async function loadExistingImages() {
+// Firebase Files Tab Logic
+async function loadFirebaseFiles() {
+    const grid = document.getElementById("firebaseFilesGrid");
+    if (!grid) return;
+    
+    grid.innerHTML = '<p class="muted">Loading files...</p>';
+    
     try {
-        const menuMetaRef = doc(db, "menu", "dynamic_cards");
-        const docSnap = await getDoc(menuMetaRef);
-
-        const galleryContainer = document.getElementById("imageGallery");
-        if (!galleryContainer) return;
-
-        if (docSnap.exists() && docSnap.data().pages) {
-            const pagesWithImages = autoIndexPages(docSnap.data().pages).filter(p => p.url);
-
-            if (pagesWithImages.length === 0) {
-                galleryContainer.innerHTML = "<p class='muted'>No uploaded images present yet.</p>";
-                return;
-            }
-
-            galleryContainer.innerHTML = pagesWithImages.map(img => `
-                <div class="image-card" id="${img.id}" style="border: 1px solid #ddd; padding: 10px; border-radius: 8px; background: #fff; cursor: pointer;" onclick="window.openImageModal('${img.url}')">
-                    <img src="${img.url}" style="width: 100%; height: 140px; object-fit: cover; border-radius: 4px;" />
-                    <p style="margin: 8px 0 4px 0;"><strong>Position:</strong> Slot ${img.order + 1}</p>
-                    <p style="margin: 0;"><small><strong>By:</strong> ${img.uploadedBy}</small></p>
-                    <p style="margin: 0;"><small><strong>Date:</strong> ${img.uploadedAt}</small></p>
-                </div>
-            `).join("");
-        } else {
-            galleryContainer.innerHTML = "<p class='muted'>No uploaded images present yet.</p>";
+        const listRef = ref(storage, 'general_files/');
+        const res = await listAll(listRef);
+        
+        if (res.items.length === 0) {
+            grid.innerHTML = '<p class="muted">No files uploaded yet.</p>';
+            return;
+        }
+        
+        grid.innerHTML = "";
+        for (const itemRef of res.items) {
+            const url = await getDownloadURL(itemRef);
+            const fileName = itemRef.name;
+            
+            const card = document.createElement("div");
+            card.style = "border: 1px solid #ddd; padding: 12px; border-radius: 8px; background: #f9f9f9; word-break: break-all;";
+            card.innerHTML = `
+                <p style="font-weight: 600; font-size: 0.9rem; margin-bottom: 8px;">${fileName}</p>
+                <a href="${url}" target="_blank" style="display: block; margin-bottom: 10px; color: #007bff; text-decoration: none; font-size: 0.85rem;">View File</a>
+                <button onclick="window.deleteFirebaseFile('general_files/${fileName}')" style="background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; width: 100%;">Delete File</button>
+            `;
+            grid.appendChild(card);
         }
     } catch (error) {
-        console.error("// Error loading gallery images:", error);
+        console.error("// Error loading Firebase files:", error);
+        grid.innerHTML = `<p style="color: red;">Error loading files: ${error.message}</p>`;
     }
 }
 
-// ==========================================
-// 8. MOMENTS MODULE (Step 4: Firestore Document Integration)
-// ==========================================
-
-// Fetch and render Moments collection from Firestore
-async function loadMoments() {
+window.deleteFirebaseFile = async function(storagePath) {
+    if (!confirm("Are you sure you want to delete this file? This cannot be undone.")) return;
+    
     try {
-        console.log("// Moments: Fetching moments collection from Firestore...");
-        const momentsRef = collection(db, "moments");
-        const snapshot = await getDocs(momentsRef);
-
-        momentsList = [];
-        snapshot.forEach((docSnap) => {
-            momentsList.push({ id: docSnap.id, ...docSnap.data() });
-        });
-
-        console.log(`// Moments: Loaded ${momentsList.length} moments.`);
-        renderMomentsList();
+        const fileRef = ref(storage, storagePath);
+        await deleteObject(fileRef);
+        console.log(`// Firebase Storage: Successfully deleted [${storagePath}]`);
+        await loadFirebaseFiles();
     } catch (error) {
-        console.error("// Moments Error: Failed to fetch moments from Firestore", error);
+        console.error("// Error deleting file:", error);
+        alert("Failed to delete file: " + error.message);
+    }
+};
+
+async function loadMomentsMedia() {
+    const grid = document.getElementById("momentsMediaGrid");
+    if (!grid) return;
+
+    grid.innerHTML = '<p class="muted">Loading moments media library...</p>';
+
+    try {
+        const listRef = ref(storage, 'moments/');
+        const res = await listAll(listRef);
+
+        if (res.items.length === 0) {
+            grid.innerHTML = '<p class="muted">No moments media uploaded yet.</p>';
+            return;
+        }
+
+        grid.innerHTML = "";
+        for (const itemRef of res.items) {
+            const url = await getDownloadURL(itemRef);
+            const fileName = itemRef.name;
+
+            const card = document.createElement("div");
+            card.style = "border: 1px solid #ddd; padding: 12px; border-radius: 8px; background: #f9f9f9; word-break: break-all;";
+            card.innerHTML = `
+                <p style="font-weight: 600; font-size: 0.9rem; margin-bottom: 8px;">${fileName}</p>
+                <a href="${url}" target="_blank" style="display: block; margin-bottom: 10px; color: #007bff; text-decoration: none; font-size: 0.85rem;">View File</a>
+                <button onclick="window.deleteMomentsMediaFile('moments/${fileName}')" style="background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; width: 100%;">Delete File</button>
+            `;
+            grid.appendChild(card);
+        }
+    } catch (error) {
+        console.error("// Error loading moments media:", error);
+        grid.innerHTML = `<p style="color: red;">Error loading moments media: ${error.message}</p>`;
     }
 }
 
-// Render Moments UI list inside #momentsContainer
-function renderMomentsList() {
-    const container = document.getElementById("momentsContainer");
-    if (!container) return;
+window.deleteMomentsMediaFile = async function(storagePath) {
+    if (!confirm("Delete this moments media file?")) return;
 
-    if (momentsList.length === 0) {
-        container.innerHTML = `<p class="muted">No moments configured yet. Click "Add New Moment" below to create one.</p>`;
+    try {
+        const fileRef = ref(storage, storagePath);
+        await deleteObject(fileRef);
+        console.log(`// Firebase Storage: Successfully deleted [${storagePath}]`);
+        await loadMomentsMedia();
+    } catch (error) {
+        console.error("// Error deleting moments file:", error);
+        alert("Failed to delete file: " + error.message);
+    }
+};
+
+function initMomentsMediaUpload() {
+    const uploadBtn = document.getElementById("uploadMomentsMediaBtn");
+    const fileInput = document.getElementById("momentsMediaFileInput");
+    const statusDiv = document.getElementById("momentsMediaUploadStatus");
+
+    if (!uploadBtn) {
+        console.warn("// uploadMomentsMediaBtn not found in DOM");
         return;
     }
 
-    container.innerHTML = momentsList.map((moment) => `
-        <div class="moment-card" id="moment-${moment.id}" style="border: 1px solid #ccc; padding: 16px; border-radius: 8px; margin-bottom: 12px; background: #fff;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                <h4 style="margin: 0;">${moment.title || "Untitled Moment"}</h4>
-                <div>
-                    <label style="font-size: 0.85rem; margin-right: 10px;">
-                        <input type="checkbox" ${moment.isActive ? "checked" : ""} onchange="window.toggleMomentActive('${moment.id}', this.checked)" /> Active
-                    </label>
-                    <button onclick="window.deleteMoment('${moment.id}')" style="color: #dc3545; border: none; background: none; cursor: pointer; font-weight: bold;">🗑️ Delete</button>
-                </div>
-            </div>
-            <p style="margin: 4px 0; color: #555; font-size: 0.9rem;"><strong>Subtitle:</strong> ${moment.subtitle || "N/A"}</p>
-            <p style="margin: 4px 0; color: #555; font-size: 0.9rem;"><strong>Theme:</strong> ${moment.theme || "default"}</p>
-        </div>
-    `).join("");
+    uploadBtn.addEventListener("click", async () => {
+        if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+            alert("Please select a file first.");
+            return;
+        }
+
+        const file = fileInput.files[0];
+        const storagePath = `moments/${Date.now()}_${file.name}`;
+        const storageRef = ref(storage, storagePath);
+
+        if (statusDiv) {
+            statusDiv.textContent = "Uploading...";
+            statusDiv.style.color = "#007bff";
+        }
+
+        try {
+            console.log("// uploading moments media file", file.name, storagePath);
+            await uploadBytes(storageRef, file);
+            if (statusDiv) {
+                statusDiv.textContent = "Upload successful!";
+                statusDiv.style.color = "#28a745";
+            }
+            fileInput.value = "";
+            await loadMomentsMedia();
+        } catch (error) {
+            console.error("// Error uploading moments media file:", error);
+            if (statusDiv) {
+                statusDiv.textContent = "Upload failed: " + (error.message || error.code || "Unknown error");
+                statusDiv.style.color = "#dc3545";
+            }
+            alert("Moments file upload failed: " + (error.message || error.code || "Check console for details."));
+        }
+    });
 }
 
-// Global Window Handler: Save or Update Moment Document
-window.saveMoment = async function(momentId, momentData) {
-    try {
-        const user = auth.currentUser;
-        const id = momentId || `moment_${Date.now()}`;
-        const momentRef = doc(db, "moments", id);
+function initFirebaseFileUpload() {
+    const uploadGeneralFileBtn = document.getElementById("uploadGeneralFileBtn");
+    const fileInput = document.getElementById("generalFileInput");
+    const statusDiv = document.getElementById("generalFileUploadStatus");
 
-        const payload = {
-            title: momentData.title || "",
-            subtitle: momentData.subtitle || "",
-            theme: momentData.theme || "default",
-            animation: momentData.animation || "fade",
-            isActive: momentData.isActive ?? true,
-            updatedBy: user ? user.email : "system",
-            updatedAt: serverTimestamp()
-        };
+    console.log("// initFirebaseFileUpload", {
+        uploadGeneralFileBtn: !!uploadGeneralFileBtn,
+        fileInput: !!fileInput,
+        statusDiv: !!statusDiv,
+    });
 
-        await setDoc(momentRef, payload, { merge: true });
-        console.log(`// Moments: Saved moment [${id}] successfully.`);
-        await loadMoments();
-    } catch (error) {
-        console.error("// Moments Error: Failed to save moment document", error);
+    if (!uploadGeneralFileBtn) {
+        console.warn("// uploadGeneralFileBtn not found in DOM");
+        return;
     }
-};
 
-// Global Window Handler: Toggle Active Status
-window.toggleMomentActive = async function(momentId, isActive) {
-    try {
-        const momentRef = doc(db, "moments", momentId);
-        await updateDoc(momentRef, {
-            isActive: isActive,
-            updatedAt: serverTimestamp()
-        });
-        console.log(`// Moments: Toggled active status for [${momentId}] to ${isActive}`);
-    } catch (error) {
-        console.error("// Moments Error: Failed to toggle active status", error);
-    }
-};
+    uploadGeneralFileBtn.addEventListener("click", async () => {
+        if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+            alert("Please select a file to upload first.");
+            return;
+        }
+        
+        const file = fileInput.files[0];
+        const storagePath = `general_files/${Date.now()}_${file.name}`;
+        const storageRef = ref(storage, storagePath);
+        
+        if (statusDiv) {
+            statusDiv.textContent = "Uploading...";
+            statusDiv.style.color = "#007bff";
+        }
+        
+        try {
+            await uploadBytes(storageRef, file);
+            if (statusDiv) {
+                statusDiv.textContent = "Upload successful!";
+                statusDiv.style.color = "#28a745";
+            }
+            fileInput.value = "";
+            await loadFirebaseFiles();
+        } catch (error) {
+            console.error("// Error uploading general file:", error);
+            if (statusDiv) {
+                statusDiv.textContent = "Upload failed: " + error.message;
+                statusDiv.style.color = "#dc3545";
+            }
+        }
+        
+        setTimeout(() => {
+            if (statusDiv && statusDiv.textContent.includes("successful")) {
+                statusDiv.textContent = "";
+            }
+        }, 3000);
+    });
+}
 
-// Global Window Handler: Delete Moment Document
-window.deleteMoment = async function(momentId) {
-    if (!confirm("Are you sure you want to delete this moment?")) return;
-
-    try {
-        const momentRef = doc(db, "moments", momentId);
-        await deleteDoc(momentRef);
-        console.log(`// Moments: Deleted moment document [${momentId}]`);
-        await loadMoments();
-    } catch (error) {
-        console.error("// Moments Error: Failed to delete moment document", error);
-    }
-};
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => {
+        initFirebaseFileUpload();
+        initMomentsMediaUpload();
+    });
+} else {
+    initFirebaseFileUpload();
+    initMomentsMediaUpload();
+}
