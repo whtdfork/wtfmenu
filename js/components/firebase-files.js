@@ -1,3 +1,5 @@
+// js/components/firebase-files.js
+
 import { storage } from "../firebase-config.js";
 import { ref, uploadBytes, getDownloadURL, deleteObject, listAll } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
@@ -8,7 +10,7 @@ export async function loadFirebaseFiles() {
     grid.innerHTML = '<p class="muted">Loading files...</p>';
     
     try {
-        const listRef = ref(storage, 'general_files/');
+        const listRef = ref(storage, 'moments/');
         const res = await listAll(listRef);
         
         if (res.items.length === 0) {
@@ -26,13 +28,31 @@ export async function loadFirebaseFiles() {
             card.innerHTML = `
                 <p style="font-weight: 600; font-size: 0.9rem; margin-bottom: 8px;">${fileName}</p>
                 <a href="${url}" target="_blank" style="display: block; margin-bottom: 10px; color: #007bff; text-decoration: none; font-size: 0.85rem;">View File</a>
-                <button onclick="window.deleteFirebaseFile('general_files/${fileName}')" style="background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; width: 100%;">Delete File</button>
+                <button onclick="window.deleteFirebaseFile('moments/${fileName}')" style="background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; width: 100%;">Delete File</button>
             `;
             grid.appendChild(card);
         }
     } catch (error) {
         console.error("// Error loading Firebase files:", error);
         grid.innerHTML = `<p style="color: red;">Error loading files: ${error.message}</p>`;
+    }
+}
+
+// Helper to fetch list of file objects specifically for dropdown integration elsewhere (e.g., Moments)
+export async function getFirebaseFilesList() {
+    try {
+        const listRef = ref(storage, 'moments/');
+        const res = await listAll(listRef);
+        const files = [];
+        
+        for (const itemRef of res.items) {
+            const url = await getDownloadURL(itemRef);
+            files.push({ name: itemRef.name, url: url });
+        }
+        return files;
+    } catch (error) {
+        console.error("// Error fetching Firebase files list for dropdowns:", error);
+        return [];
     }
 }
 
@@ -64,7 +84,7 @@ export function initFirebaseFileUpload() {
         }
         
         const file = fileInput.files[0];
-        const storagePath = `general_files/${Date.now()}_${file.name}`;
+        const storagePath = `moments/${Date.now()}_${file.name}`;
         const storageRef = ref(storage, storagePath);
         
         if (statusDiv) {

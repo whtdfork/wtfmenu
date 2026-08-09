@@ -8,10 +8,15 @@ import { loadDynamicMenu } from "./components/dynamic-menu.js";
 import { setupImageModal } from "./components/modal.js";
 import { initFirebaseFileUpload, loadFirebaseFiles } from "./components/firebase-files.js";
 import { initMomentsMediaUpload, loadMomentsMedia } from "./components/moments-media.js";
+import { initMomentsMediaPicker } from "./components/moments-media-picker.js";
+// Correct path to your moments management file containing the save/preview/deactivate listeners
+import "./moments.js";
 
-// Dummy placeholders if not defined elsewhere yet
 async function loadExistingImages() {}
 async function loadMoments() {}
+
+// Track initialization state to prevent double execution
+let isAppInitialized = false;
 
 // Initialize Auth Guard & App Bootstrapping
 onAuthStateChanged(auth, async (user) => {
@@ -22,10 +27,19 @@ onAuthStateChanged(auth, async (user) => {
         const emailEl = document.getElementById("userEmail");
         if (emailEl) emailEl.textContent = user.email;
         
-        await loadDynamicMenu();
-        await loadExistingImages();
-        await loadMoments();
-        setupImageModal();
+        if (!isAppInitialized) {
+            isAppInitialized = true;
+            await loadDynamicMenu();
+            await loadExistingImages();
+            await loadMoments();
+            setupImageModal();
+            await initMomentsMediaPicker();
+            
+            // Initialize moments button event listeners (Save, Preview, Deactivate)
+            if (typeof initMoments === "function") {
+                initMoments();
+            }
+        }
     }
 });
 

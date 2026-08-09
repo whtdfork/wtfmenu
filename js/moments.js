@@ -204,30 +204,22 @@ const MomentsEngine = {
             return;
         }
 
-        // Remove existing overlay if present
         const existingOverlay = document.getElementById("momentOverlay");
         if (existingOverlay) {
             existingOverlay.remove();
         }
 
-        // Load Lottie Library if Lottie URL is provided
-        if (activeMoment.lottieUrl) {
-            await loadLottieScript();
-        }
-
-        // Build Full-screen Overlay with Theme Class
+        // Build Full-screen Overlay with Theme Class FIRST so elements exist in scope
         const overlay = document.createElement("div");
         overlay.id = "momentOverlay";
         overlay.className = `moment-overlay theme-${activeMoment.theme || 'welcome'}`;
         overlay.style.zIndex = "9999";
 
-        // Optional Audio element for background music/wishes
         let audioElementHtml = "";
         if (activeMoment.audioUrl) {
             audioElementHtml = `<audio id="momentAudio" src="${activeMoment.audioUrl}" autoplay loop></audio>`;
         }
 
-        // Optional Media Image HTML
         let mediaImageHtml = "";
         if (activeMoment.imageUrl) {
             mediaImageHtml = `<img src="${activeMoment.imageUrl}" class="moment-banner-img" alt="Occasion Banner" />`;
@@ -245,18 +237,32 @@ const MomentsEngine = {
         `;
 
         document.body.appendChild(overlay);
+        console.log("// MomentsEngine: Overlay appended to DOM successfully.");
 
-        // Initialize Lottie Animation if container exists
-        if (activeMoment.lottieUrl && window.lottie) {
+        // Initialize Animation (Supports both Lottie JSON and direct image/SVG animations)
+        if (activeMoment.lottieUrl) {
             const lottieContainer = overlay.querySelector("#lottieContainer");
             if (lottieContainer) {
-                window.lottie.loadAnimation({
-                    container: lottieContainer,
-                    renderer: "svg",
-                    loop: true,
-                    autoplay: true,
-                    path: activeMoment.lottieUrl
-                });
+                const isJsonUrl = activeMoment.lottieUrl.toLowerCase().includes(".json");
+                
+                if (isJsonUrl) {
+                    console.log("// MomentsEngine: Loading Lottie JSON animation from URL");
+                    await loadLottieScript();
+                    if (window.lottie) {
+                        window.lottie.loadAnimation({
+                            container: lottieContainer,
+                            renderer: "svg",
+                            loop: true,
+                            autoplay: true,
+                            path: activeMoment.lottieUrl
+                        });
+                    } else {
+                        console.error("// MomentsEngine Error: Lottie library failed to load");
+                    }
+                } else {
+                    console.log("// MomentsEngine: Loading graphic animation asset (SVG/GIF/Image)");
+                    lottieContainer.innerHTML = `<img src="${activeMoment.lottieUrl}" style="max-width: 100%; max-height: 150px; object-fit: contain;" alt="Animation Asset" />`;
+                }
             }
         }
 
@@ -267,7 +273,6 @@ const MomentsEngine = {
             transitionDismissed = true;
             overlay.classList.add("fade-out");
 
-            // Stop audio on dismiss
             const audioEl = document.getElementById("momentAudio");
             if (audioEl) {
                 audioEl.pause();
@@ -296,14 +301,28 @@ const MomentsEngine = {
     }
 };
 
-// DOM Container Initialization
-const momentsContainer = document.getElementById("momentsContainer");
+// Bind admin action button event listeners safely
 document.addEventListener("DOMContentLoaded", () => {
+    const momentsContainer = document.getElementById("momentsContainer");
     if (momentsContainer) {
         MomentsEngine.renderActiveMoment(momentsContainer);
     }
+
     if (document.getElementById("toggleMomentBtn")) {
         window.syncMomentAdminUI();
+        
+        // Ensure click listener is bound programmatically in case HTML onclick is missing
+        const toggleBtn = document.getElementById("toggleMomentBtn");
+        if (toggleBtn && !toggleBtn.hasAttribute("data-bound")) {
+            toggleBtn.setAttribute("data-bound", "true");
+            toggleBtn.addEventListener("click", window.toggleMomentStatus);
+        }
+    }
+
+    const saveBtn = document.getElementById("saveMomentConfigBtn");
+    if (saveBtn && !saveBtn.hasAttribute("data-bound")) {
+        saveBtn.setAttribute("data-bound", "true");
+        saveBtn.addEventListener("click", window.saveMomentConfig);
     }
 });
 
