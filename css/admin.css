@@ -340,3 +340,15 @@ body {
         grid-template-columns: 1fr;
     }
 }
+
+/* Activate Button Style (Primary / Action) */
+.save-btn.activate-btn {
+    background-color: #0d6efd;
+    color: #ffffff;
+}
+
+/* Deactivate Button Style (Warning / Danger Action) */
+.save-btn.deactivate-btn {
+    background-color: #dc3545;
+    color: #ffffff;
+}

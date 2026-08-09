@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WHT D FORK - Admin Panel</title>
     <link rel="stylesheet" href="../css/admin.css">
+    <link rel="stylesheet" href="../css/moments.css">
 </head>
 <body>
     <div class="admin-wrapper">
@@ -16,14 +17,20 @@
             </div>
             
             <nav class="nav-menu">
-                <button class="nav-item active" data-tab="menu-images">
+                <button class="nav-item" data-tab="menu-images">
                     <span class="icon">🖼️</span> Menu Images
                 </button>
-                <button class="nav-item" data-tab="today-offer">
+                <button class="nav-item active" data-tab="today-offer">
                     <span class="icon">🔥</span> Today's Offer
                 </button>
                 <button class="nav-item" data-tab="restaurant-info">
                     <span class="icon">ℹ️</span> Restaurant Info
+                </button>
+                <button class="nav-item" data-tab="moments">
+                    <span class="icon">⭐</span> Moments
+                </button>
+                <button class="nav-item" data-tab="moments-media">
+                    <span class="icon">📂</span> Moments Media
                 </button>
                 <button class="nav-item" data-tab="gallery">
                     <span class="icon">📷</span> Gallery
@@ -31,6 +38,11 @@
                 <button class="nav-item" data-tab="opening-hours">
                     <span class="icon">🕒</span> Opening Hours
                 </button>
+                <!-- NEW CODE ADDED START -->
+                <button class="nav-item" data-tab="firebase-files">
+                    <span class="icon">📁</span> Firebase Files
+                </button>
+                <!-- NEW CODE ADDED END -->
             </nav>
 
             <div class="sidebar-footer">
@@ -42,12 +54,12 @@
         <!-- Main Content Area -->
         <main class="main-content">
             <header class="top-header">
-                <h1 id="pageTitle">Menu Images</h1>
+                <h1 id="pageTitle">Today's Offer</h1>
             </header>
 
             <div class="content-body">
                 <!-- Tab 1: Dynamic Menu Images -->
-                <section id="tab-menu-images" class="tab-content active">
+                <section id="tab-menu-images" class="tab-content">
                     <div class="section-intro" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                         <div>
                             <h3>Manage Dynamic Menu Cards</h3>
@@ -58,14 +70,14 @@
                         </button>
                     </div>
 
-                    <!-- Dynamic Menu Grid Container (populated via admin.js) -->
+                    <!-- Dynamic Menu Grid Container -->
                     <div class="menu-grid" id="menuGridContainer" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px;">
                         <!-- Cards are dynamically injected here -->
                     </div>
                 </section>
 
-                <!-- Tab 2: Today's Offer -->
-                <section id="tab-today-offer" class="tab-content">
+                <!-- Tab 2: Today's Offer (Default Selected) -->
+                <section id="tab-today-offer" class="tab-content active">
                     <div class="section-intro">
                         <h3>Today's Offer</h3>
                         <p>Special banner updates for daily deals.</p>
@@ -86,7 +98,161 @@
                     </div>
                 </section>
 
-                <!-- Tab 4: Gallery -->
+                <!-- Tab 4: Moments ⭐ -->
+                <section id="tab-moments" class="tab-content">
+                    <div class="section-intro">
+                        <h3>Moments Engine ⭐</h3>
+                        <p>Manage warm welcomes, festival greetings, and special occasion overlays for your customers.</p>
+                    </div>
+
+                    <div class="moments-grid" id="momentsGrid">
+                        <div class="moment-card active-moment" style="max-width: 650px; background: #ffffff; padding: 20px; border-radius: 12px; border: 1px solid #e0e0e0;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                <h4 style="font-size: 1.2rem; font-weight: 700;">Occasion Greeting Overlay</h4>
+                                <span class="active-badge" id="momentBadge">ACTIVE</span>
+                            </div>
+
+                            <!-- Configuration Form -->
+                            <div class="moment-form" style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 20px;">
+                                <div>
+                                    <label style="font-weight: 600; display: block; margin-bottom: 4px;">Occasion / Theme:</label>
+                                    <select id="momentThemeSelect" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;">
+                                        <option value="welcome">Everyday Welcome 🍽️</option>
+                                        <option value="diwali">Diwali Festival 🪔</option>
+                                        <option value="holi">Holi Festival of Colors 🎨</option>
+                                        <option value="birthday">Birthday Celebration 🎉</option>
+                                        <option value="newyear">Happy New Year 🎆</option>
+                                        <option value="christmas">Merry Christmas 🎄</option>
+                                        <option value="republic">Republic Day / Independence Day 🇮🇳</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label style="font-weight: 600; display: block; margin-bottom: 4px;">Title:</label>
+                                    <input type="text" id="momentTitleInput" placeholder="e.g. Happy Diwali!" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;" />
+                                </div>
+
+                                <div>
+                                    <label style="font-weight: 600; display: block; margin-bottom: 4px;">Subtitle / Message:</label>
+                                    <textarea id="momentSubtitleInput" rows="3" placeholder="e.g. Wishing you prosperity and delicious moments!" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;"></textarea>
+                                </div>
+
+                                <!-- 1. Animation Item Block -->
+                                <div style="background: #f9f9f9; padding: 12px; border-radius: 8px; border: 1px solid #eee;">
+                                    <label style="font-weight: 700; display: block; margin-bottom: 6px;">✨ Lottie Animation (.json):</label>
+                                    <select id="animModeSelect" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc; margin-bottom: 8px;">
+                                        <option value="url">Direct URL</option>
+                                        <option value="firebase">Choose from Firebase Media</option>
+                                    </select>
+                                    
+                                    <div id="animUrlGroup">
+                                        <input type="url" id="momentLottieInput" placeholder="https://.../animation.json" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;" />
+                                    </div>
+                                    <div id="animFirebaseGroup" style="display: none;">
+                                        <select id="momentLottiePicker" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;">
+                                            <option value="">-- Select Lottie File from Firebase --</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- 2. Image Item Block -->
+                                <div style="background: #f9f9f9; padding: 12px; border-radius: 8px; border: 1px solid #eee;">
+                                    <label style="font-weight: 700; display: block; margin-bottom: 6px;">🖼️ Banner / Image (.png, .jpg, .gif, .svg):</label>
+                                    <select id="imageModeSelect" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc; margin-bottom: 8px;">
+                                        <option value="url">Direct URL</option>
+                                        <option value="firebase">Choose from Firebase Media</option>
+                                    </select>
+
+                                    <div id="imageUrlGroup">
+                                        <input type="url" id="momentImageInput" placeholder="https://.../image.png" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;" />
+                                    </div>
+                                    <div id="imageFirebaseGroup" style="display: none;">
+                                        <select id="momentImagePicker" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;">
+                                            <option value="">-- Select Image from Firebase --</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- 3. Audio Item Block -->
+                                <div style="background: #f9f9f9; padding: 12px; border-radius: 8px; border: 1px solid #eee;">
+                                    <label style="font-weight: 700; display: block; margin-bottom: 6px;">🎵 Background Audio (.mp3):</label>
+                                    <select id="audioModeSelect" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc; margin-bottom: 8px;">
+                                        <option value="url">Direct URL</option>
+                                        <option value="firebase">Choose from Firebase Media</option>
+                                    </select>
+
+                                    <div id="audioUrlGroup">
+                                        <input type="url" id="momentAudioInput" placeholder="https://.../audio.mp3" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;" />
+                                    </div>
+                                    <div id="audioFirebaseGroup" style="display: none;">
+                                        <select id="momentAudioPicker" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;">
+                                            <option value="">-- Select Audio File from Firebase --</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- 4. Video Item Block -->
+                                <div style="background: #f9f9f9; padding: 12px; border-radius: 8px; border: 1px solid #eee;">
+                                    <label style="font-weight: 700; display: block; margin-bottom: 6px;">🎥 Background Video (.mp4):</label>
+                                    <select id="videoModeSelect" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc; margin-bottom: 8px;">
+                                        <option value="url">Direct URL</option>
+                                        <option value="firebase">Choose from Firebase Media</option>
+                                    </select>
+
+                                    <div id="videoUrlGroup">
+                                        <input type="url" id="momentVideoInput" placeholder="https://.../video.mp4" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;" />
+                                    </div>
+                                    <div id="videoFirebaseGroup" style="display: none;">
+                                        <select id="momentVideoPicker" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;">
+                                            <option value="">-- Select Video File from Firebase --</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label style="font-weight: 600; display: block; margin-bottom: 4px;">Overlay Duration (ms):</label>
+                                    <input type="number" id="momentDurationInput" value="4000" step="500" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;" />
+                                </div>
+                            </div>
+
+                            <div class="card-actions" style="display: flex; gap: 10px;">
+                                <button class="upload-btn" type="button" id="saveMomentConfigBtn" style="background: #28a745; color: white; border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-weight: 600;">Save Settings</button>
+                                <button class="upload-btn" type="button" id="previewMomentBtn" style="background: #6c757d; color: white; border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-weight: 600;">Preview</button>
+                                <button class="save-btn" id="toggleMomentBtn" type="button" style="padding: 10px 18px; border-radius: 6px; cursor: pointer; font-weight: 600;">Deactivate</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Tab 5: Moments Media 📂 (Dedicated Firebase Moments Storage Manager) -->
+                <section id="tab-moments-media" class="tab-content">
+                    <div class="section-intro">
+                        <h3>Moments Media Library 📂</h3>
+                        <p>Upload, view, and manage animations, images, audio tracks, and videos stored under the <code>moments/</code> Firebase directory.</p>
+                    </div>
+
+                    <div style="background: #ffffff; padding: 20px; border-radius: 12px; border: 1px solid #e0e0e0; margin-bottom: 24px;">
+                        <h4 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 12px;">Upload New File to <code>moments/</code> Directory</h4>
+                        
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <input type="file" id="momentsMediaFileInput" accept=".json,.png,.jpg,.jpeg,.webp,.gif,.svg,.mp3,.mp4" style="padding: 8px; border-radius: 6px; border: 1px solid #ccc; flex-grow: 1;" />
+                            <button id="uploadMomentsMediaBtn" type="button" style="background: #007bff; color: white; border: none; padding: 9px 18px; border-radius: 6px; cursor: pointer; font-weight: 600;">
+                                Upload File
+                            </button>
+                        </div>
+                        <div id="momentsMediaUploadStatus" style="font-size: 0.9rem; margin-top: 10px; font-weight: bold;"></div>
+                        <small style="color: #666; display: block; margin-top: 6px;">Supported files: .json (Lottie), .png, .jpg, .webp, .gif, .svg, .mp3, .mp4</small>
+                    </div>
+
+                    <div style="background: #ffffff; padding: 20px; border-radius: 12px; border: 1px solid #e0e0e0;">
+                        <h4 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 12px;">Uploaded Files</h4>
+                        <div id="momentsMediaGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px;">
+                            <p class="muted">Loading moments media library...</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Tab 6: Gallery -->
                 <section id="tab-gallery" class="tab-content">
                     <div class="section-intro">
                         <h3>Gallery</h3>
@@ -97,7 +263,7 @@
                     </div>
                 </section>
 
-                <!-- Tab 5: Opening Hours -->
+                <!-- Tab 7: Opening Hours -->
                 <section id="tab-opening-hours" class="tab-content">
                     <div class="section-intro">
                         <h3>Opening Hours</h3>
@@ -107,11 +273,42 @@
                         <p class="muted">Coming soon in future update.</p>
                     </div>
                 </section>
+
+                <!-- NEW CODE ADDED START -->
+                <!-- Tab 8: Firebase Files -->
+                <section id="tab-firebase-files" class="tab-content">
+                    <div class="section-intro">
+                        <h3>Firebase Files</h3>
+                        <p>Upload, view, and manage files stored in your general Firebase Storage directory.</p>
+                    </div>
+
+                    <div style="background: #ffffff; padding: 20px; border-radius: 12px; border: 1px solid #e0e0e0; margin-bottom: 24px;">
+                        <h4 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 12px;">Upload New File</h4>
+                        
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <input type="file" id="generalFileInput" style="padding: 8px; border-radius: 6px; border: 1px solid #ccc; flex-grow: 1;" />
+                            <button id="uploadGeneralFileBtn" type="button" style="background: #007bff; color: white; border: none; padding: 9px 18px; border-radius: 6px; cursor: pointer; font-weight: 600;">
+                                Upload File
+                            </button>
+                        </div>
+                        <div id="generalFileUploadStatus" style="font-size: 0.9rem; margin-top: 10px; font-weight: bold;"></div>
+                    </div>
+
+                    <div style="background: #ffffff; padding: 20px; border-radius: 12px; border: 1px solid #e0e0e0;">
+                        <h4 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 12px;">Uploaded Files</h4>
+                        <div id="firebaseFilesGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px;">
+                            <p class="muted">Loading files...</p>
+                        </div>
+                    </div>
+                </section>
+                <!-- NEW CODE ADDED END -->
+
             </div>
         </main>
     </div>
 
-    <!-- Admin Logic Script -->
-    <script type="module" src="../js/admin.js"></script>
+    <!-- Main Entry Admin Logic Script -->
+   <!-- Replace your old script tag with this -->
+<script type="module" src="../js/admin.js"></script>
 </body>
 </html>
