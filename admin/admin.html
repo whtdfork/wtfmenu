@@ -213,6 +213,15 @@
                                     <label style="font-weight: 600; display: block; margin-bottom: 4px;">Overlay Duration (ms):</label>
                                     <input type="number" id="momentDurationInput" value="4000" step="500" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;" />
                                 </div>
+
+                                <div style="background: #f7fbff; padding: 16px; border-radius: 10px; border: 1px solid #dcecf9; margin-top: 10px;">
+                                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                                        <input type="checkbox" id="applyMomentToAllPages" />
+                                        <label for="applyMomentToAllPages" style="font-weight: 600;">Apply to all menu pages</label>
+                                    </div>
+                                    <div id="momentPageSelectionContainer" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; max-height: 220px; overflow: auto; padding-top: 4px;"></div>
+                                    <small style="color: #555; display: block; margin-top: 10px;">Choose which menu pages should display this greeting overlay.</small>
+                                </div>
                             </div>
 
                             <div class="card-actions" style="display: flex; gap: 10px;">

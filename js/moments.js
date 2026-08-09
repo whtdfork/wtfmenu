@@ -1,6 +1,6 @@
 // js/moments.js
 import { db } from "./firebase-config.js";
-import { collection, query, where, getDocs, limit, doc, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { collection, query, where, getDocs, getDoc, limit, doc, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 console.log("// Moments module loaded: js/moments.js executed.");
 
@@ -41,6 +41,17 @@ window.syncMomentAdminUI = async function() {
     } catch (e) {
         console.error("// Moments Error: Failed to sync Admin UI state", e);
     }
+
+    if (document.getElementById("momentPageSelectionContainer")) {
+        await loadMomentPageSelection();
+        const applyAllCheckbox = document.getElementById("applyMomentToAllPages");
+        if (applyAllCheckbox) {
+            applyAllCheckbox.addEventListener("change", () => {
+                const pageCheckboxes = document.querySelectorAll('.moment-page-checkbox');
+                pageCheckboxes.forEach((checkbox) => checkbox.checked = applyAllCheckbox.checked);
+            });
+        }
+    }
 };
 
 // Populate admin inputs with saved moment parameters
@@ -52,6 +63,85 @@ function populateAdminForm(data) {
     if (document.getElementById("momentImageInput")) document.getElementById("momentImageInput").value = data.imageUrl || "";
     if (document.getElementById("momentAudioInput")) document.getElementById("momentAudioInput").value = data.audioUrl || "";
     if (document.getElementById("momentDurationInput")) document.getElementById("momentDurationInput").value = data.duration || 4000;
+    if (document.getElementById("applyMomentToAllPages")) document.getElementById("applyMomentToAllPages").checked = data.appliedToAllPages === true;
+    window.currentMomentPageSelections = Array.isArray(data.appliedPages) ? data.appliedPages : [];
+}
+
+const AVAILABLE_MOMENT_PAGES = [
+    { id: "index", label: "index.html", url: "index.html" },
+    { id: "test-menu", label: "test-menu.html", url: "test-menu.html" },
+    { id: "home", label: "home.html", url: "home.html" },
+    { id: "admin", label: "admin.html", url: "admin/admin.html" },
+    { id: "login", label: "login.html", url: "admin/login.html" }
+];
+
+async function loadMomentPageSelection() {
+    const container = document.getElementById("momentPageSelectionContainer");
+    if (!container) return;
+
+    try {
+        const selectedIds = new Set(window.currentMomentPageSelections || []);
+        const applyAll = document.getElementById("applyMomentToAllPages")?.checked === true;
+
+        container.innerHTML = AVAILABLE_MOMENT_PAGES.map((page) => {
+            const checked = applyAll || selectedIds.has(page.id);
+            return `
+                <label style="display: block; cursor: pointer; border: 1px solid #dce7f3; border-radius: 10px; padding: 10px; background: ${checked ? '#eef6ff' : '#fff'};">
+                    <input type="checkbox" class="moment-page-checkbox" data-page-id="${page.id}" style="margin-right: 8px;" ${checked ? 'checked' : ''} />
+                    <span style="font-weight: 600;">${page.label}</span>
+                    <div style="font-size: 0.82rem; color: #666; margin-top: 4px;">${page.url}</div>
+                </label>
+            `;
+        }).join("");
+
+        container.querySelectorAll('.moment-page-checkbox').forEach((checkbox) => {
+            checkbox.addEventListener('change', () => {
+                const applyAllCheckbox = document.getElementById("applyMomentToAllPages");
+                if (applyAllCheckbox && applyAllCheckbox.checked && !checkbox.checked) {
+                    applyAllCheckbox.checked = false;
+                }
+            });
+        });
+    } catch (error) {
+        console.error("// Moments Error: failed to load menu page selection", error);
+        container.innerHTML = '<p style="color: red;">Failed to load page list.</p>';
+    }
+}
+
+function getCurrentMomentPageId() {
+    const rawName = window.location.pathname.split("/").pop() || "index.html";
+    const pageName = rawName.toLowerCase();
+
+    switch (pageName) {
+        case "":
+        case "/":
+        case "index.html":
+            return "index";
+        case "test-menu.html":
+            return "test-menu";
+        case "home.html":
+            return "home";
+        case "admin.html":
+            return "admin";
+        case "login.html":
+            return "login";
+        default:
+            return pageName.replace(/\.[^/.]+$/, "");
+    }
+}
+
+async function isMomentApplicableToCurrentPage(activeMoment) {
+    if (!activeMoment) return false;
+    if (activeMoment.appliedToAllPages === true) return true;
+
+    const currentPageId = getCurrentMomentPageId();
+    const allowedPages = Array.isArray(activeMoment.appliedPages) ? activeMoment.appliedPages : [];
+
+    if (allowedPages.length === 0) {
+        return false;
+    }
+
+    return allowedPages.includes(currentPageId);
 }
 
 // Helper function to keep UI tags and action buttons consistent
@@ -120,6 +210,14 @@ window.toggleMomentStatus = async function() {
 };
 
 // Reads current field values from admin inputs
+function getSelectedMomentPageIds() {
+    const checkboxes = document.querySelectorAll('.moment-page-checkbox');
+    return Array.from(checkboxes)
+        .filter(cb => cb.checked)
+        .map(cb => cb.dataset.pageId)
+        .filter(Boolean);
+}
+
 function getAdminFormValues(isActiveState) {
     return {
         title: document.getElementById("momentTitleInput")?.value || "Welcome to Wht D Fork! 🍽️",
@@ -130,7 +228,9 @@ function getAdminFormValues(isActiveState) {
         audioUrl: document.getElementById("momentAudioInput")?.value || "",
         duration: parseInt(document.getElementById("momentDurationInput")?.value, 10) || 4000,
         buttonText: "View Menu",
-        isActive: isActiveState
+        isActive: isActiveState,
+        appliedToAllPages: document.getElementById("applyMomentToAllPages")?.checked === true,
+        appliedPages: getSelectedMomentPageIds()
     };
 }
 
@@ -202,6 +302,12 @@ const MomentsEngine = {
 
         if (!activeMoment || activeMoment.isActive === false) {
             console.log("// Moments: Moment is disabled. Skipping overlay.");
+            if (onComplete) onComplete();
+            return;
+        }
+
+        if (!await isMomentApplicableToCurrentPage(activeMoment, containerElement)) {
+            console.log("// MomentsEngine: Active moment is configured for other pages. Skipping overlay.");
             if (onComplete) onComplete();
             return;
         }
@@ -379,21 +485,8 @@ const MomentsEngine = {
 // Bind admin action button event listeners safely
 document.addEventListener("DOMContentLoaded", () => {
     console.log("// Moments DOMContentLoaded fired: moments page script active.");
-    // Run on customer menu page
-    const menuContainer = document.getElementById("dynamicMenuContainer");
-    if (menuContainer) {
-        MomentsEngine.renderActiveMoment(menuContainer);
-    } else {
-        console.log("// Moments: Menu container not found on this page.");
-    }
-
-    // Run on admin preview page
-    const momentsContainer = document.getElementById("momentsContainer");
-    if (momentsContainer) {
-        MomentsEngine.renderActiveMoment(momentsContainer);
-    } else {
-        console.log("// Moments: Admin preview container not found on this page.");
-    }
+    // Always attempt to render the active moment overlay on any page that loads moments.js
+    MomentsEngine.renderActiveMoment();
 
     if (document.getElementById("toggleMomentBtn")) {
         window.syncMomentAdminUI();
