@@ -219,6 +219,11 @@
         });
     </script>
     <script type="module" src="js/moments.js"></script>
+    <script type="module">
+        import("./js/customer-event.js").catch(error => {
+            console.error("// MENU_SCAN module import failed:", error);
+        });
+    </script>
 
 </body>
 </html>
