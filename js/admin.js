@@ -192,7 +192,7 @@ async function loadCustomerEventsStats() {
     const monthQ = query(eventsRef, where("createdAt", ">=", Timestamp.fromDate(monthStart)), orderBy("createdAt", "desc"));
     const monthSnap = await getDocs(monthQ);
 
-    const totals = { visitors: 0, pageViews: 0, sessions: new Set(), byEvent: {}, byPage: {}, byDeviceType: {}, byOS: {}, byBrand: {}, byBrowser: {}, byScreen: {} };
+    const totals = { visitors: 0, pageViews: 0, sessions: new Set(), byEvent: {}, byPage: {}, byDeviceType: {}, byOS: {}, byBrand: {}, byBrowser: {}, byScreen: {}, deviceHierarchy: { Phone: { total: 0, os: {} }, Computer: { total: 0, os: {} }, Other: { total: 0, items: {} } } };
     const recent = [];
 
     todaySnap.forEach(docSnap => {
@@ -211,6 +211,22 @@ async function loadCustomerEventsStats() {
         const dbrand = d.deviceBrand || d.brand || 'Unknown';
         const dbrowser = d.browser || 'Unknown';
         const screenKey = (d.screenWidth && d.screenHeight) ? `${d.screenWidth}x${d.screenHeight}` : 'Unknown';
+        // Build hierarchical device breakdown: Phone | Computer | Other
+        let primaryDevice = 'Other';
+        const dtypeKey = String(dtype || 'Unknown').toLowerCase();
+        if (dtypeKey === 'phone' || dtypeKey === 'tablet') primaryDevice = 'Phone';
+        else if (dtypeKey === 'desktop') primaryDevice = 'Computer';
+        else primaryDevice = 'Other';
+
+        totals.deviceHierarchy[primaryDevice].total = (totals.deviceHierarchy[primaryDevice].total || 0) + 1;
+        const osBucket = totals.deviceHierarchy[primaryDevice].os;
+        const osKey = dos || 'Unknown OS';
+        if (!osBucket[osKey]) osBucket[osKey] = { total: 0, brands: {} };
+        osBucket[osKey].total += 1;
+        const brandKey = dbrand || 'Unknown Brand';
+        osBucket[osKey].brands[brandKey] = (osBucket[osKey].brands[brandKey] || 0) + 1;
+
+        // Also keep flat summaries for legacy views
         totals.byDeviceType[dtype] = (totals.byDeviceType[dtype] || 0) + 1;
         totals.byOS[dos] = (totals.byOS[dos] || 0) + 1;
         totals.byBrand[dbrand] = (totals.byBrand[dbrand] || 0) + 1;
@@ -295,7 +311,77 @@ async function loadCustomerEventsStats() {
         });
     }
 
-    // Render device breakdowns
+    // Render hierarchical device breakdown optimized for mobile
+    const renderDeviceHierarchy = (hierarchy, containerId) => {
+        const el = document.getElementById(containerId);
+        if (!el) return;
+        el.innerHTML = '';
+        const containerStyle = 'background:#ffffff;padding:12px;border-radius:10px;border:1px solid #eef2ff;display:flex;flex-direction:column;gap:10px;';
+
+        Object.keys(hierarchy).forEach(primary => {
+            const block = document.createElement('div');
+            block.style.cssText = containerStyle;
+
+            const header = document.createElement('div');
+            header.style.display = 'flex';
+            header.style.justifyContent = 'space-between';
+            header.style.alignItems = 'center';
+            header.innerHTML = `<div style="font-weight:700">${primary}</div><div style="font-size:1.2rem;font-weight:800;color:#0f172a">${hierarchy[primary].total || 0}</div>`;
+            block.appendChild(header);
+
+            const osList = document.createElement('div');
+            osList.style.display = 'flex';
+            osList.style.flexDirection = 'column';
+            osList.style.gap = '8px';
+            osList.style.marginTop = '8px';
+
+            const osEntries = hierarchy[primary].os ? Object.entries(hierarchy[primary].os) : [];
+            if (osEntries.length === 0) {
+                const none = document.createElement('div');
+                none.style.color = '#64748b';
+                none.textContent = 'No data';
+                osList.appendChild(none);
+            } else {
+                osEntries.sort((a,b)=>b[1].total-a[1].total).forEach(([osName, osData]) => {
+                    const osRow = document.createElement('div');
+                    osRow.style.display = 'flex';
+                    osRow.style.flexDirection = 'column';
+                    osRow.style.gap = '6px';
+
+                    const osHeader = document.createElement('div');
+                    osHeader.style.display = 'flex';
+                    osHeader.style.justifyContent = 'space-between';
+                    osHeader.style.alignItems = 'center';
+                    osHeader.innerHTML = `<div style="font-weight:600;color:#0f172a">${osName}</div><div style="font-weight:700;color:#0f172a">${osData.total}</div>`;
+                    osRow.appendChild(osHeader);
+
+                    const brandsWrap = document.createElement('div');
+                    brandsWrap.style.display = 'flex';
+                    brandsWrap.style.flexWrap = 'wrap';
+                    brandsWrap.style.gap = '6px';
+
+                    Object.keys(osData.brands || {}).sort((a,b)=>osData.brands[b]-osData.brands[a]).forEach(brand => {
+                        const chip = document.createElement('div');
+                        chip.style.background = '#f8fafc';
+                        chip.style.padding = '6px 8px';
+                        chip.style.borderRadius = '999px';
+                        chip.style.border = '1px solid #e6eef8';
+                        chip.style.fontSize = '0.9rem';
+                        chip.textContent = `${brand} · ${osData.brands[brand]}`;
+                        brandsWrap.appendChild(chip);
+                    });
+
+                    osRow.appendChild(brandsWrap);
+                    osList.appendChild(osRow);
+                });
+            }
+
+            block.appendChild(osList);
+            el.appendChild(block);
+        });
+    };
+
+    // Render device breakdowns (legacy fallback below)
     const renderBreakdown = (map, containerId) => {
         const el = document.getElementById(containerId);
         if (!el) return;
@@ -310,8 +396,8 @@ async function loadCustomerEventsStats() {
             el.appendChild(chip);
         });
     };
-
-    renderBreakdown(totals.byDeviceType, 'deviceTypeBreakdown');
+    // Use hierarchical view for device types (mobile-first)
+    renderDeviceHierarchy(totals.deviceHierarchy, 'deviceTypeBreakdown');
     renderBreakdown(totals.byOS, 'osBreakdown');
     renderBreakdown(totals.byBrand, 'brandBreakdown');
     renderBreakdown(totals.byBrowser, 'browserBreakdown');

@@ -68,17 +68,28 @@ function listenForMenuUpdates() {
             activePages.forEach((page, index) => {
                 let existingImg = document.getElementById(page.id);
 
+                // friendly 1-based page index and metadata attributes
+                const friendlyIndex = String(index + 1);
+
                 if (existingImg) {
                     if (existingImg.src !== page.url) {
                         existingImg.src = page.url;
                     }
-                    existingImg.alt = page.title || `Menu Page ${index + 1}`;
+                    existingImg.alt = page.title || `Menu Page ${friendlyIndex}`;
+                    // ensure dataset fields are present for analytics
+                    existingImg.dataset.page = existingImg.dataset.page || friendlyIndex;
+                    existingImg.dataset.pageId = page.id;
+                    if (page.title) existingImg.dataset.pageTitle = page.title;
                 } else {
                     const newImg = document.createElement("img");
                     newImg.id = page.id;
                     newImg.className = "menu-image";
                     newImg.src = page.url;
-                    newImg.alt = page.title || `Menu Page ${index + 1}`;
+                    newImg.alt = page.title || `Menu Page ${friendlyIndex}`;
+                    // expose friendly index and raw id/title to client tracker
+                    newImg.dataset.page = friendlyIndex;
+                    newImg.dataset.pageId = page.id;
+                    if (page.title) newImg.dataset.pageTitle = page.title;
                     
                     // First page loads eagerly, subsequent images lazy load as user scrolls
                     newImg.loading = index === 0 ? "eager" : "lazy";

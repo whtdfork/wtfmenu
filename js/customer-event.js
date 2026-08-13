@@ -159,18 +159,26 @@ function setupPageImageViews() {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 const el = entry.target;
-                const page = el.dataset.page || el.id || el.alt || "unknown";
-                const key = PAGE_VIEW_KEY_PREFIX + page;
+                // Prefer a friendly page index if set by the loader, but also capture raw page id/title
+                const pageViewed = el.dataset.page || (el.id ? String(el.id) : null) || el.alt || "unknown";
+                const pageId = el.dataset.pageId || el.id || null;
+                const pageTitle = el.dataset.pageTitle || el.alt || null;
+                const key = PAGE_VIEW_KEY_PREFIX + pageViewed;
                 // Use sessionStorage key to guard both Firestore and GA4: send only once per session per page
                 if (safeSessionStorageGet(key)) return;
 
                 // perform Firestore write and only on success set session key and send GA
                 (async () => {
                     try {
-                        const id = await sendEventToFirestore("MENU_PAGE_VIEW", { pageViewed: page });
+                        const extraPayload = { pageViewed: pageViewed, pageId: pageId, pageTitle: pageTitle, page: pageViewed };
+                        // if pageViewed is a numeric string, provide pageIndex for admin convenience
+                        if (pageViewed && !isNaN(Number(pageViewed))) {
+                            extraPayload.pageIndex = Number(pageViewed);
+                        }
+                        const id = await sendEventToFirestore("MENU_PAGE_VIEW", extraPayload);
                         if (id) {
                             safeSessionStorageSet(key, id);
-                            trackAnalyticsEvent("menu_page_view", { page: page });
+                            trackAnalyticsEvent("menu_page_view", { page: pageViewed });
                         }
                     } catch (e) {
                         console.error("// TRACKER MENU_PAGE_VIEW failed:", e);
