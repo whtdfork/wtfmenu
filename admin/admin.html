@@ -113,6 +113,73 @@
                             <p id="dashboardLastUpdated" style="margin:0;color:#0f172a;line-height:1.5;">Not available</p>
                         </div>
                     </div>
+
+                    <!-- Analytics Stats -->
+                    <div id="dashboardStats" style="margin-top:24px; display:grid; grid-template-columns: 1fr 420px; gap:20px; align-items:start;">
+                        <div style="background:#ffffff;padding:16px;border-radius:12px;border:1px solid #e6eef8;">
+                            <h4 style="margin:0 0 10px;">Realtime Menu Analytics (last 24 hours)</h4>
+                            <div style="display:flex;gap:12px;margin-bottom:12px;">
+                                <div style="flex:1;background:#f8fafc;padding:12px;border-radius:8px;border:1px solid #e6eef8;">
+                                    <small style="color:#64748b;">Visitors (MENU_OPEN)</small>
+                                    <div id="statVisitorsToday" style="font-size:1.6rem;font-weight:700;">0</div>
+                                </div>
+                                <div style="flex:1;background:#f8fafc;padding:12px;border-radius:8px;border:1px solid #e6eef8;">
+                                    <small style="color:#64748b;">Unique Sessions</small>
+                                    <div id="statUniqueSessions" style="font-size:1.6rem;font-weight:700;">0</div>
+                                </div>
+                                <div style="flex:1;background:#f8fafc;padding:12px;border-radius:8px;border:1px solid #e6eef8;">
+                                    <small style="color:#64748b;">Page Views</small>
+                                    <div id="statPageViews" style="font-size:1.6rem;font-weight:700;">0</div>
+                                </div>
+                            </div>
+
+                            <div style="display:flex;gap:12px;margin-bottom:12px;">
+                                <div style="flex:1;background:#fff7ed;padding:10px;border-radius:8px;border:1px solid #fde3c6;">
+                                    <small style="color:#944">This Month - Visitors</small>
+                                    <div id="statVisitorsMonth" style="font-size:1.2rem;font-weight:700;">0</div>
+                                </div>
+                                <div style="flex:1;background:#fff7ed;padding:10px;border-radius:8px;border:1px solid #fde3c6;">
+                                    <small style="color:#944">This Month - Unique Sessions</small>
+                                    <div id="statUniqueSessionsMonth" style="font-size:1.2rem;font-weight:700;">0</div>
+                                </div>
+                                <div style="flex:1;background:#fff7ed;padding:10px;border-radius:8px;border:1px solid #fde3c6;">
+                                    <small style="color:#944">This Month - Page Views</small>
+                                    <div id="statPageViewsMonth" style="font-size:1.2rem;font-weight:700;">0</div>
+                                </div>
+                            </div>
+
+                            <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center;">
+                                <button id="showDetailedBtn" style="background:#2563eb;color:#fff;border:none;padding:8px 12px;border-radius:8px;cursor:pointer;font-weight:700;">Show Detailed Analytics</button>
+                                <button id="hideDetailedBtn" style="display:none;background:#6b7280;color:#fff;border:none;padding:8px 12px;border-radius:8px;cursor:pointer;font-weight:700;">Hide Detailed Analytics</button>
+                                <small style="color:#64748b;margin-left:8px;">Detailed stats load on demand.</small>
+                            </div>
+
+                            <div id="detailedAnalytics" style="display:none;margin-top:12px;border-radius:8px;padding:10px;background:#ffffff;border:1px solid #eef2ff;">
+                                <div id="detailedLast7" style="margin-bottom:8px;"></div>
+                                <div id="detailedMonthly" style="margin-bottom:8px;"></div>
+                                <div id="detailedYearly" style="margin-bottom:8px;"></div>
+                                <div id="detailedAllTime" style="margin-bottom:8px;"></div>
+                            </div>
+
+                            <h5 style="margin:8px 0;">Events Breakdown</h5>
+                            <div id="eventsBreakdown" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-bottom:12px;"></div>
+
+                            <h5 style="margin:8px 0;">Page Views (by page)</h5>
+                            <div id="pageViewsList" style="max-height:220px;overflow:auto;border-radius:8px;padding:8px;border:1px solid #f1f5f9;background:#fbfdff;"></div>
+
+                            <h5 style="margin:12px 0 8px;">Device Breakdown</h5>
+                            <div id="deviceTypeBreakdown" style="display:flex;gap:8px;margin-bottom:8px;"></div>
+                            <div id="osBreakdown" style="display:flex;gap:8px;margin-bottom:8px;"></div>
+                            <div id="brandBreakdown" style="display:flex;gap:8px;margin-bottom:8px;"></div>
+                            <div id="browserBreakdown" style="display:flex;gap:8px;margin-bottom:8px;"></div>
+                            <div id="screenSizeBreakdown" style="display:flex;gap:8px;margin-bottom:8px;"></div>
+                        </div>
+
+                        <div style="background:#ffffff;padding:16px;border-radius:12px;border:1px solid #e6eef8;">
+                            <h4 style="margin:0 0 10px;">Recent Events</h4>
+                            <div id="recentEventsList" style="max-height:520px;overflow:auto;font-family:monospace;font-size:.9rem;padding:8px;border-radius:8px;border:1px solid #f1f5f9;background:#fcfeff;"></div>
+                        </div>
+                    </div>
                 </section>
 
                 <!-- Tab 3: Today's Offer -->
