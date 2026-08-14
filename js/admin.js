@@ -192,7 +192,7 @@ async function loadCustomerEventsStats() {
     const monthQ = query(eventsRef, where("createdAt", ">=", Timestamp.fromDate(monthStart)), orderBy("createdAt", "desc"));
     const monthSnap = await getDocs(monthQ);
 
-    const totals = { visitors: 0, pageViews: 0, sessions: new Set(), byEvent: {}, byPage: {}, byDeviceType: {}, byOS: {}, byBrand: {}, byBrowser: {}, byScreen: {}, deviceHierarchy: { Phone: { total: 0, os: {} }, Computer: { total: 0, os: {} }, Other: { total: 0, items: {} } } };
+    const totals = { visitors: 0, pageViews: 0, sessions: new Set(), byEvent: {}, byPage: {}, byDeviceType: {}, byOS: {}, byBrand: {}, byBrowser: {}, byScreen: {}, deviceHierarchy: { Phone: { total: 0, os: {} }, Computer: { total: 0, os: {} }, Other: { total: 0, os: {} } } };
     const recent = [];
 
     todaySnap.forEach(docSnap => {
@@ -296,17 +296,125 @@ async function loadCustomerEventsStats() {
         }
     }
 
-    // Recent events
+    // Recent events (human-friendly compact): time-ago, short session, friendly page, minimal device; click to expand full details
     const recentEl = document.getElementById("recentEventsList");
     if (recentEl) {
         recentEl.innerHTML = "";
+
+        const timeAgo = (d) => {
+            if (!d) return '-';
+            const dt = (d.toDate ? d.toDate() : new Date(d));
+            const diff = Math.floor((Date.now() - dt.getTime()) / 1000);
+            if (diff < 60) return `${diff}s ago`;
+            if (diff < 3600) return `${Math.floor(diff/60)}m ago`;
+            if (diff < 86400) return `${Math.floor(diff/3600)}h ago`;
+            return `${Math.floor(diff/86400)}d ago`;
+        };
+
+        const prettyPage = (p) => {
+            if (!p) return null;
+            if (p === 'index' || p === '/' || p === 'home') return 'Home';
+            return String(p).replace(/^\//, '');
+        };
+
+        const shortSession = (s) => {
+            if (!s) return null;
+            const parts = String(s).split('-');
+            return parts.length ? parts[parts.length-1].slice(-6) : String(s).slice(-6);
+        };
+
+        const eventLabel = (type) => {
+            if (!type) return 'Event';
+            const map = { MENU_OPEN: 'Menu opened', MENU_PAGE_VIEW: 'Page view', MENU_SCAN: 'Menu scan' };
+            return map[type] || type.replace(/_/g,' ').toLowerCase().replace(/(^|\s)\w/g, c=>c.toUpperCase());
+        };
+
         recent.slice(0, 200).forEach(evt => {
-            const time = evt.createdAt && evt.createdAt.toDate ? evt.createdAt.toDate().toLocaleString() : "-";
-            const line = document.createElement("div");
-            line.style.padding = "6px 4px";
-            line.style.borderBottom = "1px solid #f1f5f9";
-            const deviceInfo = `type:${evt.deviceType||evt.type||'-'} os:${evt.deviceOS||evt.os||'-'} brand:${evt.deviceBrand||evt.brand||'-'} browser:${evt.browser||'-'} screen:${(evt.screenWidth&&evt.screenHeight)?evt.screenWidth+'x'+evt.screenHeight:'-'} `;
-            line.innerHTML = `<div><strong>${evt.eventType || 'evt'}</strong> <span style=\"color:#94a3b8;\">${time}</span></div><div style=\"color:#0f172a;\">session:${evt.sessionId || '-'} page:${evt.page || evt.pageViewed || '-'} ${deviceInfo}</div><div style=\"color:#475569;\">ua:${(evt.userAgent||'').slice(0,120)}</div>`;
+            const created = evt.createdAt;
+            const timeText = timeAgo(created);
+            const label = eventLabel(evt.eventType);
+            const pageVal = prettyPage(evt.page || evt.pageViewed);
+            const sess = shortSession(evt.sessionId);
+
+            const line = document.createElement('div');
+            line.style.padding = '8px 6px';
+            line.style.borderBottom = '1px solid #f1f5f9';
+            line.style.display = 'flex';
+            line.style.flexDirection = 'column';
+
+            const top = document.createElement('div');
+            top.style.display = 'flex';
+            top.style.justifyContent = 'space-between';
+            top.style.alignItems = 'center';
+
+            const left = document.createElement('div');
+            left.innerHTML = `<strong>${label}</strong>${pageVal ? ` · <span style="color:#0f172a">${pageVal}</span>` : ''}`;
+            left.style.fontSize = '0.95rem';
+
+            const right = document.createElement('div');
+            right.style.color = '#94a3b8';
+            right.textContent = timeText + (sess ? ` · s:${sess}` : '');
+
+            top.appendChild(left);
+            top.appendChild(right);
+            line.appendChild(top);
+
+            // minimal device summary
+            const deviceParts = [];
+            if (evt.deviceType) deviceParts.push(evt.deviceType);
+            else if (evt.deviceOS) deviceParts.push(evt.deviceOS);
+            else if (evt.browser) deviceParts.push(evt.browser);
+            if (evt.screenWidth && evt.screenHeight) deviceParts.push(`${evt.screenWidth}x${evt.screenHeight}`);
+            if (deviceParts.length) {
+                const dev = document.createElement('div');
+                dev.style.color = '#475569';
+                dev.style.fontSize = '0.9rem';
+                dev.textContent = deviceParts.join(' · ');
+                line.appendChild(dev);
+            }
+
+            // expandable details (hidden by default)
+            const details = document.createElement('div');
+            details.style.display = 'none';
+            details.style.marginTop = '6px';
+            details.style.color = '#334155';
+            details.style.fontSize = '0.85rem';
+
+            const detailRows = [];
+            if (evt.userAgent) detailRows.push(`User-Agent: ${evt.userAgent}`);
+            if (evt.deviceBrand) detailRows.push(`Brand: ${evt.deviceBrand}`);
+            if (evt.browser) detailRows.push(`Browser: ${evt.browser}`);
+            if (evt.deviceOS) detailRows.push(`OS: ${evt.deviceOS}`);
+            if (evt.page) detailRows.push(`Page: ${evt.page}`);
+            if (evt.pageViewed) detailRows.push(`Page Viewed: ${evt.pageViewed}`);
+            if (evt.referrer) detailRows.push(`Referrer: ${evt.referrer}`);
+
+            if (detailRows.length === 0) {
+                details.textContent = 'No additional details.';
+            } else {
+                details.innerHTML = detailRows.map(r => `<div>${r}</div>`).join('');
+            }
+
+            // toggle button
+            const toggle = document.createElement('button');
+            toggle.textContent = 'Details';
+            toggle.style.marginTop = '6px';
+            toggle.style.alignSelf = 'start';
+            toggle.style.fontSize = '0.8rem';
+            toggle.style.padding = '4px 8px';
+            toggle.style.borderRadius = '6px';
+            toggle.style.border = '1px solid #e6eef8';
+            toggle.style.background = '#fff';
+            toggle.style.cursor = 'pointer';
+            toggle.addEventListener('click', () => {
+                const open = details.style.display !== 'none';
+                details.style.display = open ? 'none' : 'block';
+                toggle.textContent = open ? 'Details' : 'Hide';
+            });
+
+            line.appendChild(toggle);
+            line.appendChild(details);
+
             recentEl.appendChild(line);
         });
     }
